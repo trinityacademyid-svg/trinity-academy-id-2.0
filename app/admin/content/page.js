@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '../../../lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 const SECTIONS = [
   { key: 'hero_title',    label: 'Hero — Judul Utama',          type: 'text',     hint: 'Judul besar di halaman home' },
@@ -19,6 +19,7 @@ const SECTIONS = [
 ]
 
 export default function AdminContent() {
+  const supabase = createClient()
   const [content, setContent] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving]   = useState(false)
@@ -26,10 +27,16 @@ export default function AdminContent() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('site_content').select('*')
-    const map = {}
-    ;(data ?? []).forEach(row => { map[row.key] = row.value })
-    setContent(map)
+    const { data, error } = await supabase.from('site_content').select('*')
+    if (error) {
+      console.error('Load site content error:', error)
+      showToast('Gagal memuat konten: ' + error.message)
+      setContent({})
+    } else {
+      const map = {}
+      ;(data ?? []).forEach(row => { map[row.key] = row.value })
+      setContent(map)
+    }
     setLoading(false)
   }
   useEffect(() => { load() }, [])
@@ -41,8 +48,12 @@ export default function AdminContent() {
     const upserts = Object.entries(content).map(([key, value]) => ({ key, value }))
     const { error } = await supabase.from('site_content').upsert(upserts, { onConflict: 'key' })
     setSaving(false)
-    if (error) alert('Gagal menyimpan: ' + error.message)
-    else showToast('Semua konten berhasil disimpan!')
+    if (error) {
+      console.error('Save site content error:', error)
+      showToast('Gagal menyimpan konten: ' + error.message)
+    } else {
+      showToast('Semua konten berhasil disimpan!')
+    }
   }
 
   if (loading) return <div style={{ padding: 48, textAlign: 'center', color: 'var(--gray-400)' }}>Memuat konten...</div>

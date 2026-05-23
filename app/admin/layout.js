@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '../../lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
   { href: '/admin/dashboard',     label: 'Dashboard',  icon: <IcGrid /> },
@@ -13,6 +13,7 @@ const navItems = [
 ]
 
 export default function AdminLayout({ children }) {
+  const supabase = createClient()
   const router   = useRouter()
   const pathname = usePathname()
   const isLogin  = pathname === '/admin'

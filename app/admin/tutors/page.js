@@ -1,11 +1,12 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
-import { supabase } from '../../../lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 const EMPTY = { name: '', role: '', jenjang: '', bio: '', mapel: '', photo_url: '', active: true }
 
 export default function AdminTutors() {
+  const supabase = createClient()
   const [tutors, setTutors]     = useState([])
   const [form, setForm]         = useState(EMPTY)
   const [editId, setEditId]     = useState(null)
@@ -18,8 +19,14 @@ export default function AdminTutors() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('tutors').select('*').order('created_at', { ascending: false })
-    setTutors(data ?? [])
+    const { data, error } = await supabase.from('tutors').select('*').order('created_at', { ascending: false })
+    if (error) {
+      console.error('Load tutors error:', error)
+      showToast('Gagal memuat tutor: ' + error.message)
+      setTutors([])
+    } else {
+      setTutors(data ?? [])
+    }
     setLoading(false)
   }
 
@@ -45,13 +52,19 @@ export default function AdminTutors() {
     if (!form.name || !form.role) return alert('Nama dan jabatan wajib diisi.')
     setSaving(true)
     const payload = { ...form, mapel: form.mapel.split(',').map(s => s.trim()).filter(Boolean) }
+    let result
     if (editId) {
-      await supabase.from('tutors').update(payload).eq('id', editId)
-      showToast('Tutor berhasil diperbarui.')
+      result = await supabase.from('tutors').update(payload).eq('id', editId)
     } else {
-      await supabase.from('tutors').insert(payload)
-      showToast('Tutor berhasil ditambahkan.')
+      result = await supabase.from('tutors').insert(payload)
     }
+    if (result.error) {
+      console.error('Save tutor error:', result.error)
+      showToast('Gagal menyimpan tutor: ' + result.error.message)
+      setSaving(false)
+      return
+    }
+    showToast(editId ? 'Tutor berhasil diperbarui.' : 'Tutor berhasil ditambahkan.')
     setSaving(false)
     setForm(EMPTY); setEditId(null); setShowForm(false)
     load()
@@ -59,7 +72,12 @@ export default function AdminTutors() {
 
   async function handleDelete(id) {
     if (!confirm('Hapus tutor ini?')) return
-    await supabase.from('tutors').delete().eq('id', id)
+    const { error } = await supabase.from('tutors').delete().eq('id', id)
+    if (error) {
+      console.error('Delete tutor error:', error)
+      showToast('Gagal menghapus tutor: ' + error.message)
+      return
+    }
     showToast('Tutor dihapus.')
     load()
   }

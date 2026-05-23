@@ -6,9 +6,10 @@ import Footer from './Footer'
 export default function ConditionalLayout({ children }) {
   const pathname = usePathname()
   const isAdmin  = pathname?.startsWith('/admin')
+  const isLogin  = pathname === '/login'
 
-  if (isAdmin) {
-    // Halaman admin: tidak ada navbar/footer website, tidak ada WA button
+  if (isAdmin || isLogin) {
+    // Halaman admin/login: tidak ada navbar/footer website, tidak ada WA button
     return <>{children}</>
   }
 

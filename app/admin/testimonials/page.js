@@ -1,10 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '../../../lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 const EMPTY = { name: '', role: '', text: '', rating: 5, active: true }
 
 export default function AdminTestimonials() {
+  const supabase = createClient()
   const [items, setItems]       = useState([])
   const [form, setForm]         = useState(EMPTY)
   const [editId, setEditId]     = useState(null)
@@ -15,8 +16,14 @@ export default function AdminTestimonials() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false })
-    setItems(data ?? [])
+    const { data, error } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false })
+    if (error) {
+      console.error('Load testimonials error:', error)
+      showToast('Gagal memuat testimoni: ' + error.message)
+      setItems([])
+    } else {
+      setItems(data ?? [])
+    }
     setLoading(false)
   }
   useEffect(() => { load() }, [])
@@ -26,19 +33,27 @@ export default function AdminTestimonials() {
   async function handleSave() {
     if (!form.name || !form.text) return alert('Nama dan isi testimoni wajib diisi.')
     setSaving(true)
-    if (editId) {
-      await supabase.from('testimonials').update(form).eq('id', editId)
-      showToast('Testimoni diperbarui.')
-    } else {
-      await supabase.from('testimonials').insert(form)
-      showToast('Testimoni ditambahkan.')
+    const result = editId
+      ? await supabase.from('testimonials').update(form).eq('id', editId)
+      : await supabase.from('testimonials').insert(form)
+    if (result.error) {
+      console.error('Save testimonials error:', result.error)
+      showToast('Gagal menyimpan testimoni: ' + result.error.message)
+      setSaving(false)
+      return
     }
+    showToast(editId ? 'Testimoni diperbarui.' : 'Testimoni ditambahkan.')
     setSaving(false); setForm(EMPTY); setEditId(null); setShowForm(false); load()
   }
 
   async function handleDelete(id) {
     if (!confirm('Hapus testimoni ini?')) return
-    await supabase.from('testimonials').delete().eq('id', id)
+    const { error } = await supabase.from('testimonials').delete().eq('id', id)
+    if (error) {
+      console.error('Delete testimonials error:', error)
+      showToast('Gagal menghapus testimoni: ' + error.message)
+      return
+    }
     showToast('Testimoni dihapus.'); load()
   }
 

@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase } from '../../../lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 const STATUS_COLORS = {
   baru:      { bg: '#dbeafe', text: '#1d4ed8' },
@@ -10,6 +10,7 @@ const STATUS_COLORS = {
 }
 
 export default function AdminRegistrations() {
+  const supabase = createClient()
   const [items, setItems]       = useState([])
   const [loading, setLoading]   = useState(true)
   const [search, setSearch]     = useState('')
@@ -19,8 +20,14 @@ export default function AdminRegistrations() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('registrations').select('*').order('created_at', { ascending: false })
-    setItems(data ?? [])
+    const { data, error } = await supabase.from('registrations').select('*').order('created_at', { ascending: false })
+    if (error) {
+      console.error('Load registrations error:', error)
+      showToast('Gagal memuat pendaftar: ' + error.message)
+      setItems([])
+    } else {
+      setItems(data ?? [])
+    }
     setLoading(false)
   }
   useEffect(() => { load() }, [])
@@ -28,7 +35,12 @@ export default function AdminRegistrations() {
   function showToast(msg) { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
   async function updateStatus(id, status) {
-    await supabase.from('registrations').update({ status }).eq('id', id)
+    const { error } = await supabase.from('registrations').update({ status }).eq('id', id)
+    if (error) {
+      console.error('Update registration status error:', error)
+      showToast('Gagal memperbarui status: ' + error.message)
+      return
+    }
     showToast('Status diperbarui.')
     setSelected(s => s ? { ...s, status } : s)
     load()
@@ -36,7 +48,12 @@ export default function AdminRegistrations() {
 
   async function handleDelete(id) {
     if (!confirm('Hapus data pendaftar ini?')) return
-    await supabase.from('registrations').delete().eq('id', id)
+    const { error } = await supabase.from('registrations').delete().eq('id', id)
+    if (error) {
+      console.error('Delete registration error:', error)
+      showToast('Gagal menghapus data: ' + error.message)
+      return
+    }
     showToast('Data dihapus.')
     setSelected(null); load()
   }

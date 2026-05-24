@@ -263,7 +263,50 @@ on conflict (key) do nothing;
 -- values ('PASTE-AUTH-USER-UUID-HERE', 'super_admin', true)
 -- on conflict (user_id) do update set role = excluded.role, active = excluded.active;
 
--- Storage note:
--- Create a public bucket named "trinity-assets" for tutor/founder assets, or keep it private
--- and update the application to use signed URLs. The current admin upload UI stores tutor
--- images at tutors/<timestamp>.<ext> and reads public URLs from this bucket.
+-- Storage policies for the public "trinity-assets" bucket.
+-- The admin UI uploads tutor images to tutors/<timestamp>.<ext> and founder images
+-- to founders/<timestamp>.<ext>. The bucket itself must already exist in Supabase Storage.
+drop policy if exists "Public can read trinity assets" on storage.objects;
+create policy "Public can read trinity assets"
+  on storage.objects
+  for select
+  to public
+  using (bucket_id = 'trinity-assets');
+
+drop policy if exists "Admins can upload trinity assets" on storage.objects;
+create policy "Admins can upload trinity assets"
+  on storage.objects
+  for insert
+  to authenticated
+  with check (
+    bucket_id = 'trinity-assets'
+    and public.is_admin()
+    and (storage.foldername(name))[1] in ('tutors', 'founders')
+  );
+
+drop policy if exists "Admins can update trinity assets" on storage.objects;
+create policy "Admins can update trinity assets"
+  on storage.objects
+  for update
+  to authenticated
+  using (
+    bucket_id = 'trinity-assets'
+    and public.is_admin()
+    and (storage.foldername(name))[1] in ('tutors', 'founders')
+  )
+  with check (
+    bucket_id = 'trinity-assets'
+    and public.is_admin()
+    and (storage.foldername(name))[1] in ('tutors', 'founders')
+  );
+
+drop policy if exists "Admins can delete trinity assets" on storage.objects;
+create policy "Admins can delete trinity assets"
+  on storage.objects
+  for delete
+  to authenticated
+  using (
+    bucket_id = 'trinity-assets'
+    and public.is_admin()
+    and (storage.foldername(name))[1] in ('tutors', 'founders')
+  );

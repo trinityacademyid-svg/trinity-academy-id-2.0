@@ -1,7 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
-export default function Footer() {
+export default function Footer({ contact = {} }) {
+  const address = contact.address ?? ''
+  const email = contact.email ?? ''
+  const officeHours = contact.officeHours ?? ''
+  const waUrl = contact.waUrl ?? '#'
+
   return (
     <footer style={{ background: 'var(--navy)', color: 'rgba(255,255,255,.5)', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
       <div className="container" style={{ padding: '72px 28px 36px' }}>
@@ -27,7 +32,7 @@ export default function Footer() {
               Platform pendidikan dan bimbingan belajar yang menggabungkan akademik dengan pendekatan sociopreneur untuk generasi muda Indonesia.
             </p>
             <p style={{ marginTop: 20, fontSize: '.83rem' }}>
-              📍 Ambon, Maluku — Indonesia
+              📍 {address}
             </p>
           </div>
 
@@ -61,14 +66,14 @@ export default function Footer() {
           <div>
             <p style={{ color: 'white', fontWeight: 700, fontSize: '.88rem', marginBottom: 18, letterSpacing: '.05em', textTransform: 'uppercase' }}>Kontak</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer"
+              <a href={waUrl} target="_blank" rel="noopener noreferrer"
                  className="btn btn-primary"
                  style={{ justifyContent: 'center', fontSize: '.88rem', padding: '11px 20px' }}>
                 WhatsApp Kami
               </a>
               <p style={{ fontSize: '.83rem', lineHeight: 1.7 }}>
-                info@trinityacademy.id<br />
-                Senin – Sabtu, 08.00 – 20.00 WIT
+                {email}<br />
+                {officeHours}
               </p>
             </div>
           </div>
@@ -76,7 +81,7 @@ export default function Footer() {
 
         <div style={{ paddingTop: 28, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, fontSize: '.8rem', color: 'rgba(255,255,255,.28)' }}>
           <span>© {new Date().getFullYear()} Trinity Academy. All rights reserved.</span>
-          <span>Ambon, Maluku — Indonesia</span>
+          <span>{address}</span>
         </div>
       </div>
 

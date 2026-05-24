@@ -1,6 +1,12 @@
 import './globals.css'
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google'
 import ConditionalLayout from '../components/ConditionalLayout'
+import {
+  SITE_FALLBACKS,
+  buildWhatsAppUrl,
+  getSiteContent,
+  getSiteValue,
+} from '@/lib/site-content'
 
 const playfair = Playfair_Display({
   weight: ['700', '900'],
@@ -20,11 +26,26 @@ export const metadata = {
   description: 'Platform pendidikan dan bimbingan belajar terpercaya di Ambon, Maluku.',
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const content = await getSiteContent()
+  const contact = {
+    waUrl: buildWhatsAppUrl(
+      getSiteValue(content, 'wa_number'),
+      'Hallo Trinity Academy, saya ingin konsultasi.',
+    ),
+    registerUrl: buildWhatsAppUrl(
+      getSiteValue(content, 'wa_number'),
+      'Hallo Trinity Academy, saya ingin mendaftar.',
+    ),
+    email: getSiteValue(content, 'email', SITE_FALLBACKS.email),
+    address: getSiteValue(content, 'address', SITE_FALLBACKS.address),
+    officeHours: getSiteValue(content, 'office_hours', SITE_FALLBACKS.office_hours),
+  }
+
   return (
     <html lang="id" className={`${playfair.variable} ${jakarta.variable}`}>
       <body className="font-[family-name:var(--font-jakarta)]">
-        <ConditionalLayout>{children}</ConditionalLayout>
+        <ConditionalLayout contact={contact}>{children}</ConditionalLayout>
       </body>
     </html>
   )

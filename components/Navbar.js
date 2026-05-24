@@ -11,7 +11,7 @@ const navLinks = [
   { href: '/tutor',     label: 'Tutor' },
 ]
 
-export default function Navbar() {
+export default function Navbar({ waUrl = '#' }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = usePathname()
@@ -88,7 +88,7 @@ export default function Navbar() {
 
           {/* ── CTA button ── */}
           <a
-            href="https://wa.me/6281234567890"
+            href={waUrl}
             target="_blank" rel="noopener noreferrer"
             className="nav-desktop"
             style={{
@@ -159,7 +159,7 @@ export default function Navbar() {
           ))}
 
           <a
-            href="https://wa.me/6281234567890"
+            href={waUrl}
             target="_blank" rel="noopener noreferrer"
             onClick={() => setMenuOpen(false)}
             style={{

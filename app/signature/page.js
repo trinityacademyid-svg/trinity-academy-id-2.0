@@ -1,4 +1,11 @@
 import Link from 'next/link'
+import {
+  DEFAULT_SIGNATURE_PROGRAMS,
+  buildWhatsAppUrl,
+  getJsonSiteValue,
+  getSiteContent,
+  getSiteValue,
+} from '@/lib/site-content'
 
 export const metadata = {
   title: 'Signature Programs — Trinity Academy',
@@ -43,7 +50,14 @@ const programs = [
   },
 ]
 
-export default function SignaturePage() {
+export default async function SignaturePage() {
+  const content = await getSiteContent()
+  const programs = getJsonSiteValue(content, 'signature_programs', DEFAULT_SIGNATURE_PROGRAMS)
+  const waUrl = buildWhatsAppUrl(
+    getSiteValue(content, 'wa_number'),
+    'Hallo Trinity Academy, saya ingin informasi Signature Programs.',
+  )
+
   return (
     <main style={{ paddingTop: 0 }}>
 
@@ -138,7 +152,7 @@ export default function SignaturePage() {
           <p style={{ color: 'rgba(255,255,255,.72)', marginBottom: 36, fontSize: '1rem' }}>
             Hubungi kami untuk informasi pendaftaran dan jadwal program terbaru.
           </p>
-          <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="btn btn-gold btn-lg">
+          <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-gold btn-lg">
             Hubungi Kami Sekarang
           </a>
         </div>

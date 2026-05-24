@@ -1,25 +1,15 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import FounderPhoto from '../components/FounderPhoto'
+import {
+  DEFAULT_FOUNDERS,
+  buildWhatsAppUrl,
+  getJsonSiteValue,
+  getSiteContent,
+  getSiteValue,
+} from '@/lib/site-content'
 
 /* ─── DATA — edit sesuai info asli Trinity ─────────────────── */
-
-const founders = [
-  {
-    name: 'Nama Founder 1',
-    role: 'Co-Founder & CEO',
-    photo: '/images/founder-1.jpg',   // letakkan foto di /public/images/
-    bio: 'Deskripsi singkat Founder 1. Latar belakang pendidikan, pengalaman, dan motivasi mendirikan Trinity Academy. Ganti teks ini dengan cerita nyata.',
-    linkedin: '#',
-  },
-  {
-    name: 'Nama Founder 2',
-    role: 'Co-Founder & Director',
-    photo: '/images/founder-2.jpg',   // letakkan foto di /public/images/
-    bio: 'Deskripsi singkat Founder 2. Latar belakang pendidikan, pengalaman, dan kontribusi dalam membangun Trinity Academy. Ganti teks ini dengan cerita nyata.',
-    linkedin: '#',
-  },
-]
 
 const milestones = [
   { year: '2021', title: 'Trinity Academy Berdiri', desc: 'Berawal dari keprihatinan terhadap keterbatasan akses pendidikan berkualitas di Ambon, Trinity Academy resmi didirikan.' },
@@ -96,7 +86,29 @@ export const metadata = {
   description: 'Kenali lebih dekat Trinity Academy, visi misi, sejarah, dan para founder di balik lembaga pendidikan terpercaya di Ambon.',
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const content = await getSiteContent()
+  const founders = getJsonSiteValue(content, 'founders', DEFAULT_FOUNDERS)
+  const aboutStory = getSiteValue(
+    content,
+    'about_story',
+    'Trinity Academy lahir dari keprihatinan mendalam terhadap kesenjangan kualitas pendidikan di wilayah Indonesia Timur, khususnya Ambon dan Maluku. Kami meyakini bahwa keterbatasan geografis tidak seharusnya menjadi penghalang bagi generasi muda untuk berkembang.',
+  )
+  const aboutVision = getSiteValue(
+    content,
+    'about_vision',
+    'Menjadi platform pendidikan terdepan di Indonesia Timur yang melahirkan generasi muda berprestasi, berkarakter, dan berdampak.',
+  )
+  const aboutMission = getSiteValue(
+    content,
+    'about_mission',
+    'Menghadirkan layanan bimbingan belajar berkualitas, program pengembangan diri berbasis sociopreneur, dan ekosistem pendidikan yang inklusif bagi seluruh pelajar.',
+  )
+  const waUrl = buildWhatsAppUrl(
+    getSiteValue(content, 'wa_number'),
+    'Hallo Trinity Academy, saya ingin konsultasi.',
+  )
+
   return (
     <main style={{ paddingTop: 0 }}>
 
@@ -140,9 +152,7 @@ export default function AboutPage() {
               <h2 className="section-title">Mengapa Trinity <em>Hadir?</em></h2>
               <div className="divider" style={{ margin: '20px 0 26px' }} />
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.85, marginBottom: 18 }}>
-                Trinity Academy lahir dari keprihatinan mendalam terhadap kesenjangan kualitas pendidikan
-                di wilayah Indonesia Timur, khususnya Ambon dan Maluku. Kami meyakini bahwa keterbatasan
-                geografis tidak seharusnya menjadi penghalang bagi generasi muda untuk berkembang.
+                {aboutStory}
               </p>
               <p style={{ color: 'var(--gray-600)', lineHeight: 1.85, marginBottom: 18 }}>
                 Didirikan pada 2021, Trinity Academy hadir sebagai jembatan antara potensi siswa dan
@@ -160,12 +170,12 @@ export default function AboutPage() {
               {[
                 {
                   label: 'Visi',
-                  text: 'Menjadi platform pendidikan terdepan di Indonesia Timur yang melahirkan generasi muda berprestasi, berkarakter, dan berdampak.',
+                  text: aboutVision,
                   accent: 'var(--blue)',
                 },
                 {
                   label: 'Misi',
-                  text: 'Menghadirkan layanan bimbingan belajar berkualitas, program pengembangan diri berbasis sociopreneur, dan ekosistem pendidikan yang inklusif bagi seluruh pelajar.',
+                  text: aboutMission,
                   accent: 'var(--gold)',
                 },
               ].map(({ label, text, accent }) => (
@@ -318,7 +328,7 @@ export default function AboutPage() {
               }}>
                 {/* Photo area */}
                 <div style={{ position: 'relative', aspectRatio: '4/3', background: 'var(--blue-pale)', overflow: 'hidden' }}>
-                  <FounderPhoto src={f.photo} alt={`Foto ${f.name}`} />
+                  <FounderPhoto src={f.photo_url || f.photo || '/images/maskot.png'} alt={`Foto ${f.name}`} />
                   {/* Placeholder shown before photo uploaded */}
                   <div style={{
                     position: 'absolute', inset: 0,
@@ -331,7 +341,7 @@ export default function AboutPage() {
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                       <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    <p style={{ fontSize: '.78rem', marginTop: 10 }}>Upload foto ke /public/images/</p>
+                    <p style={{ fontSize: '.78rem', marginTop: 10 }}>Foto Founder</p>
                   </div>
                   {/* Gold accent bar */}
                   <div style={{
@@ -387,7 +397,7 @@ export default function AboutPage() {
             Mulai perjalanan belajar ananda bersama kami. Konsultasi gratis, tanpa biaya pendaftaran.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer"
+            <a href={waUrl} target="_blank" rel="noopener noreferrer"
                className="btn btn-gold btn-lg">
               Hubungi Kami
             </a>

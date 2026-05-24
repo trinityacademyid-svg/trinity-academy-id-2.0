@@ -3,7 +3,7 @@ import { usePathname } from 'next/navigation'
 import Navbar from './Navbar'
 import Footer from './Footer'
 
-export default function ConditionalLayout({ children }) {
+export default function ConditionalLayout({ children, contact }) {
   const pathname = usePathname()
   const isAdmin  = pathname?.startsWith('/admin')
   const isLogin  = pathname === '/login'
@@ -16,11 +16,11 @@ export default function ConditionalLayout({ children }) {
   // Halaman publik: tampilkan navbar, footer, dan WA button
   return (
     <>
-      <Navbar />
+      <Navbar waUrl={contact?.registerUrl} />
       {children}
-      <Footer />
+      <Footer contact={contact} />
       <a
-        href="https://wa.me/6281234567890?text=Hallo%20Trinity%20Academy%2C%20saya%20ingin%20konsultasi."
+        href={contact?.waUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="wa-float"

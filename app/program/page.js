@@ -1,4 +1,14 @@
 import Link from 'next/link'
+import {
+  DEFAULT_ONLINE_PROGRAMS,
+  DEFAULT_PRIVATE_PROGRAMS,
+  DEFAULT_WHY_ONLINE,
+  DEFAULT_WHY_PRIVATE,
+  buildWhatsAppUrl,
+  getJsonSiteValue,
+  getSiteContent,
+  getSiteValue,
+} from '@/lib/site-content'
 
 export const metadata = {
   title: 'Program — Trinity Academy',
@@ -40,7 +50,21 @@ function IconCheck({ color = 'var(--blue)' }) {
   )
 }
 
-export default function ProgramPage() {
+export default async function ProgramPage() {
+  const content = await getSiteContent()
+  const privatePrograms = getJsonSiteValue(content, 'program_private_items', DEFAULT_PRIVATE_PROGRAMS)
+  const onlinePrograms = getJsonSiteValue(content, 'program_online_items', DEFAULT_ONLINE_PROGRAMS)
+  const whyPrivate = getJsonSiteValue(content, 'program_private_benefits', DEFAULT_WHY_PRIVATE)
+  const whyOnline = getJsonSiteValue(content, 'program_online_benefits', DEFAULT_WHY_ONLINE)
+  const waUrl = buildWhatsAppUrl(
+    getSiteValue(content, 'wa_number'),
+    'Hallo Trinity Academy, saya ingin mendaftar program.',
+  )
+  const consultUrl = buildWhatsAppUrl(
+    getSiteValue(content, 'wa_number'),
+    'Hallo Trinity Academy, saya ingin konsultasi program.',
+  )
+
   return (
     <main style={{ paddingTop: 0 }}>
       {/* Hero */}
@@ -89,7 +113,7 @@ export default function ProgramPage() {
                       </li>
                     ))}
                   </ul>
-                  <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ justifyContent: 'center', marginTop: 4 }}>Daftar Sekarang</a>
+                  <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ justifyContent: 'center', marginTop: 4 }}>Daftar Sekarang</a>
                 </div>
               ))}
             </div>
@@ -120,7 +144,7 @@ export default function ProgramPage() {
                       </li>
                     ))}
                   </ul>
-                  <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="btn btn-gold" style={{ justifyContent: 'center', marginTop: 4 }}>Daftar Sekarang</a>
+                  <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-gold" style={{ justifyContent: 'center', marginTop: 4 }}>Daftar Sekarang</a>
                 </div>
               ))}
             </div>
@@ -151,7 +175,7 @@ export default function ProgramPage() {
           <p style={{ color: 'rgba(255,255,255,.72)', marginBottom: 36, fontSize: '1rem' }}>
             Konsultasikan kebutuhan ananda secara gratis. Kami bantu tentukan program yang paling sesuai.
           </p>
-          <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" className="btn btn-gold btn-lg">Konsultasi Gratis Sekarang</a>
+          <a href={consultUrl} target="_blank" rel="noopener noreferrer" className="btn btn-gold btn-lg">Konsultasi Gratis Sekarang</a>
         </div>
       </section>
 

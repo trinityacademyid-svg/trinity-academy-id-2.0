@@ -1,9 +1,17 @@
-'use client'
-import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-
-const WA = 'https://wa.me/6281234567890?text=Hallo%20Trinity%20Academy%2C%20saya%20ingin%20konsultasi.'
+import { createClient } from '@/lib/supabase/server'
+import {
+  DEFAULT_ONLINE_PROGRAMS,
+  DEFAULT_PRIVATE_PROGRAMS,
+  DEFAULT_SIGNATURE_PROGRAMS,
+  SITE_FALLBACKS,
+  buildWhatsAppUrl,
+  getJsonSiteValue,
+  getSiteContent,
+  getSiteValue,
+} from '@/lib/site-content'
+import MapelTabs from './MapelTabs'
 
 /* ─── MAPEL DATA ───────────────────────────────────────────── */
 const mapelData = {
@@ -51,7 +59,20 @@ function IconStar({ filled = true, size = 16 }) {
 
 /* ─── HOME SECTIONS ────────────────────────────────────────── */
 
-function Hero() {
+function Hero({ content, waUrl }) {
+  const title = getSiteValue(content, 'hero_title', 'Mendampingi Generasi Muda Berkembang dan Berdampak')
+  const subtitle = getSiteValue(
+    content,
+    'hero_subtitle',
+    'Trinity Academy adalah platform pendidikan yang menggabungkan bimbingan belajar akademik dengan pendekatan sociopreneur - les private, online, dan program pengembangan diri.',
+  )
+  const stats = [
+    [getSiteValue(content, 'stat_tutors', '50+'), 'Pengajar Aktif'],
+    [getSiteValue(content, 'stat_students', '300+'), 'Siswa Terdaftar'],
+    [getSiteValue(content, 'stat_rating', '4.9'), 'Rating Kepuasan'],
+    [getSiteValue(content, 'stat_years', '3+'), 'Tahun Berdiri'],
+  ]
+
   return (
     <section style={{
       minHeight: '100vh',
@@ -91,7 +112,7 @@ function Hero() {
         {/* Eyebrow */}
         <div className="eyebrow eyebrow-white" style={{ marginBottom: 24 }}>
           <span className="eyebrow-line" />
-          Ambon, Maluku — Indonesia
+          {getSiteValue(content, 'address', SITE_FALLBACKS.address)}
         </div>
 
         <h1 style={{
@@ -100,18 +121,15 @@ function Hero() {
           color: 'white', lineHeight: 1.08, marginBottom: 28,
           maxWidth: 720,
         }}>
-          Mendampingi Generasi<br />
-          Muda <em style={{ fontStyle: 'italic', color: '#c9920a' }}>Berkembang</em> dan<br />
-          <em style={{ fontStyle: 'italic', color: '#c9920a' }}>Berdampak</em>
+          {title}
         </h1>
 
         <p style={{ fontSize: '1.08rem', lineHeight: 1.75, color: 'rgba(255,255,255,.7)', maxWidth: 540, marginBottom: 40 }}>
-          Trinity Academy adalah platform pendidikan yang menggabungkan bimbingan belajar akademik
-          dengan pendekatan sociopreneur — les private, online, dan program pengembangan diri.
+          {subtitle}
         </p>
 
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-          <a href={WA} target="_blank" rel="noopener noreferrer" className="btn btn-gold btn-lg">
+          <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-gold btn-lg">
             Konsultasi Gratis
           </a>
           <Link href="/program" className="btn btn-outline-white btn-lg">
@@ -122,7 +140,7 @@ function Hero() {
         {/* Stats row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, maxWidth: 680, marginTop: 64 }}
              className="hero-stats">
-          {[['50+','Pengajar Aktif'],['300+','Siswa Terdaftar'],['4.9','Rating Kepuasan'],['3+','Tahun Berdiri']].map(([n,l]) => (
+          {stats.map(([n,l]) => (
             <div key={l} style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 'var(--radius)', padding: '20px 16px', textAlign: 'center' }}>
               <div style={{ fontFamily: "'Playfair Display',serif", fontSize: '2rem', fontWeight: 900, color: '#c9920a', lineHeight: 1, marginBottom: 6 }}>{n}</div>
               <div style={{ fontSize: '.75rem', color: 'rgba(255,255,255,.5)', fontWeight: 500 }}>{l}</div>
@@ -147,7 +165,12 @@ function Hero() {
   )
 }
 
-function PreviewAbout() {
+function PreviewAbout({ content }) {
+  const aboutStory = getSiteValue(
+    content,
+    'about_story',
+    'Trinity Academy berdiri dengan visi menjadi lembaga pendidikan yang tidak hanya mencetak siswa berprestasi secara akademik, tetapi juga membentuk generasi muda yang berdampak bagi masyarakat.',
+  )
   return (
     <section className="section" style={{ background: 'var(--off-white)' }}>
         <div className="container preview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}>
@@ -174,7 +197,7 @@ function PreviewAbout() {
           <h2 className="section-title">Siapa <em>Trinity Academy?</em></h2>
           <div className="divider" style={{ margin: '20px 0 24px' }} />
           <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 16 }}>
-            Trinity Academy berdiri dengan visi menjadi lembaga pendidikan yang tidak hanya mencetak siswa berprestasi secara akademik, tetapi juga membentuk generasi muda yang berdampak bagi masyarakat.
+            {aboutStory}
           </p>
           <p style={{ color: 'var(--gray-600)', lineHeight: 1.8, marginBottom: 32 }}>
             Didirikan di Ambon, kami percaya bahwa setiap anak di Indonesia Timur berhak mendapatkan akses pendidikan berkualitas.
@@ -192,11 +215,18 @@ function PreviewAbout() {
   )
 }
 
-function PreviewProgram() {
+function PreviewProgram({ privatePrograms = [], onlinePrograms = [] }) {
   const items = [
-    { label: 'Les Private', desc: 'Guru datang ke rumah, jadwal fleksibel, seluruh jenjang.', href: '/program#private' },
-    { label: 'Les Online', desc: 'Belajar via Zoom & WhatsApp dari mana saja.', href: '/program#online' },
-    { label: 'UTBK / SNBT', desc: 'Program intensif persiapan masuk PTN favorit.', href: '/program#utbk' },
+    ...privatePrograms.slice(0, 2).map((program) => ({
+      label: program.title,
+      desc: program.desc,
+      href: '/program#private',
+    })),
+    ...onlinePrograms.slice(0, 1).map((program) => ({
+      label: program.title,
+      desc: program.desc,
+      href: '/program#online',
+    })),
   ]
   return (
     <section className="section dark-section">
@@ -226,9 +256,7 @@ function PreviewProgram() {
               background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.08)',
               borderRadius: 'var(--radius)', padding: '30px 26px',
               transition: 'all .25s', color: 'inherit',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,.09)'; e.currentTarget.style.borderColor = 'rgba(201,146,10,.5)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,.08)' }}>
+            }}>
               <div style={{ width: 40, height: 40, background: 'rgba(26,86,196,.3)', borderRadius: 10, marginBottom: 18,
                 display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue-light)" strokeWidth="2" strokeLinecap="round">
@@ -256,9 +284,7 @@ function PreviewProgram() {
   )
 }
 
-function MapelSection() {
-  const [activeTab, setActiveTab] = useState('SD')
-  const tabs = ['SD', 'SMP', 'SMA']
+function MapelSection({ waUrl }) {
   return (
     <section className="section" style={{ background: 'var(--off-white)' }} id="mapel">
       <div className="container">
@@ -267,52 +293,14 @@ function MapelSection() {
           <h2 className="section-title">Daftar Lengkap <em>Mata Pelajaran</em></h2>
           <p className="section-sub" style={{ margin: '0 auto' }}>Tersedia untuk jenjang SD, SMP, hingga SMA. Semua mapel ditangani oleh tutor terseleksi.</p>
         </div>
-
-        {/* Tab buttons */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 36 }}>
-          {tabs.map(tab => (
-            <button key={tab} onClick={() => setActiveTab(tab)}
-              className="btn"
-              style={{
-                padding: '10px 28px', fontSize: '.9rem',
-                background: activeTab === tab ? 'var(--blue)' : 'white',
-                color: activeTab === tab ? 'white' : 'var(--gray-600)',
-                border: `1.5px solid ${activeTab === tab ? 'var(--blue)' : 'var(--gray-200)'}`,
-                boxShadow: activeTab === tab ? '0 4px 14px rgba(26,86,196,.3)' : 'var(--shadow-sm)',
-              }}>
-              Jenjang {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Mapel grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-          {mapelData[activeTab].map((mapel, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10,
-              background: 'white', borderRadius: 'var(--radius-sm)',
-              padding: '14px 18px', border: '1px solid var(--gray-200)',
-              boxShadow: 'var(--shadow-sm)', fontSize: '.9rem', fontWeight: 500, color: 'var(--gray-800)' }}>
-              <IconCheck size={16} />
-              {mapel}
-            </div>
-          ))}
-        </div>
-
-        <p style={{ textAlign: 'center', marginTop: 28, fontSize: '.87rem', color: 'var(--gray-400)' }}>
-          Tidak menemukan mata pelajaran yang kamu cari?{' '}
-          <a href={WA} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--blue)', fontWeight: 600 }}>Hubungi kami</a>
-        </p>
+        <MapelTabs waUrl={waUrl} />
       </div>
     </section>
   )
 }
 
-function PreviewSignature() {
-  const sigs = [
-    { short: 'TASA', full: 'Trinity Academy Student Ambassador', tagline: 'The Growth Catalyst: Leveling Up The Next Generation Of Visionaries' },
-    { short: 'TIL', full: 'Trinity Impact Lab', tagline: 'Learn Today, Lead Tomorrow!' },
-    { short: 'TIT', full: 'Trinity Impact Talks', tagline: 'Voices That Inspire Action' },
-  ]
+function PreviewSignature({ programs = [] }) {
+  const sigs = programs.slice(0, 3)
   return (
     <section className="section" style={{ background: 'white' }}>
       <div className="container">
@@ -333,7 +321,7 @@ function PreviewSignature() {
                 fontFamily: "'Playfair Display',serif", fontWeight: 900, color: 'var(--blue)', fontSize: '1rem', marginBottom: 18 }}>
                 {s.short}
               </div>
-              <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.05rem', color: 'var(--navy)', marginBottom: 10 }}>{s.full}</h3>
+              <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.05rem', color: 'var(--navy)', marginBottom: 10 }}>{s.title}</h3>
               <p style={{ fontSize: '.84rem', color: 'var(--gray-600)', fontStyle: 'italic', lineHeight: 1.6 }}>"{s.tagline}"</p>
             </div>
           ))}
@@ -344,12 +332,7 @@ function PreviewSignature() {
   )
 }
 
-function PreviewTutor() {
-  const tutors = [
-    { name: 'Nama Tutor 1', mapel: 'Matematika & Fisika', jenjang: 'SMP – SMA' },
-    { name: 'Nama Tutor 2', mapel: 'Bahasa Inggris', jenjang: 'SD – SMA' },
-    { name: 'Nama Tutor 3', mapel: 'IPA & Kimia', jenjang: 'SMP – SMA' },
-  ]
+function PreviewTutor({ tutors = [] }) {
   return (
     <section className="section" style={{ background: 'var(--off-white)' }}>
       <div className="container">
@@ -359,17 +342,25 @@ function PreviewTutor() {
           <p className="section-sub" style={{ margin: '0 auto' }}>Setiap tutor melewati seleksi ketat untuk memastikan kualitas pengajaran terbaik.</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22, marginBottom: 36 }} className="tutor-grid">
-          {tutors.map((t, i) => (
+          {tutors.length === 0 ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 32, color: 'var(--gray-400)', fontSize: '.9rem' }}>
+              Data tutor belum tersedia.
+            </div>
+          ) : tutors.map((t, i) => (
             <div key={i} className="card" style={{ padding: '28px', textAlign: 'center' }}>
               <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--blue-pale)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative', overflow: 'hidden',
                 margin: '0 auto 16px', color: 'var(--blue)' }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                </svg>
+                <Image
+                  src={t.photo_url || '/images/maskot.png'}
+                  alt={`Foto ${t.name}`}
+                  fill
+                  sizes="80px"
+                  style={{ objectFit: 'cover', objectPosition: 'top' }}
+                />
               </div>
               <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.05rem', color: 'var(--navy)', marginBottom: 6 }}>{t.name}</h3>
-              <p style={{ fontSize: '.84rem', color: 'var(--blue)', fontWeight: 600, marginBottom: 4 }}>{t.mapel}</p>
+              <p style={{ fontSize: '.84rem', color: 'var(--blue)', fontWeight: 600, marginBottom: 4 }}>{Array.isArray(t.mapel) ? t.mapel.join(', ') : t.mapel}</p>
               <p style={{ fontSize: '.78rem', color: 'var(--gray-400)' }}>Jenjang: {t.jenjang}</p>
             </div>
           ))}
@@ -385,12 +376,7 @@ function PreviewTutor() {
   )
 }
 
-function Testimoni() {
-  const reviews = [
-    { name: 'Ibu Sari', role: 'Orang Tua Siswa SD', text: 'Anak saya yang tadinya kesulitan fokus kini jauh lebih semangat dan prestasinya meningkat pesat.' },
-    { name: 'Bapak Yusuf', role: 'Orang Tua Siswa SMP', text: 'Nilai matematika anak kami naik signifikan setelah dua bulan bergabung dengan Trinity Academy.' },
-    { name: 'Dewi R.', role: 'Siswa SMA — Lolos UTBK', text: 'Bimbingan intensif dari Trinity sangat membantu persiapan UTBK saya hingga berhasil masuk PTN impian.' },
-  ]
+function Testimoni({ testimonials = [] }) {
   return (
     <section className="section dark-section">
       <div className="container" style={{ position: 'relative' }}>
@@ -399,10 +385,14 @@ function Testimoni() {
           <h2 className="section-title section-title-white">Kata Mereka tentang <em>Trinity</em></h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 22 }} className="testi-grid">
-          {reviews.map((r, i) => (
+          {testimonials.length === 0 ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 32, color: 'rgba(255,255,255,.45)', fontSize: '.9rem' }}>
+              Testimoni belum tersedia.
+            </div>
+          ) : testimonials.map((r, i) => (
             <div key={i} style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 'var(--radius)', padding: '28px 24px' }}>
               <div style={{ display: 'flex', gap: 2, marginBottom: 18 }}>
-                {[...Array(5)].map((_, j) => <IconStar key={j} size={15} />)}
+                {[...Array(5)].map((_, j) => <IconStar key={j} size={15} filled={j < (r.rating ?? 5)} />)}
               </div>
               <p style={{ fontSize: '.92rem', color: 'rgba(255,255,255,.78)', lineHeight: 1.75, fontStyle: 'italic', marginBottom: 22 }}>
                 "{r.text}"
@@ -425,7 +415,7 @@ function Testimoni() {
   )
 }
 
-function CTABanner() {
+function CTABanner({ waUrl }) {
   return (
     <section style={{ background: 'var(--blue)', padding: '80px 0', position: 'relative', overflow: 'hidden' }}>
       {/* ── MASKOT CTA: pose melambai dengan senyum, pojok kiri ── */}
@@ -449,7 +439,7 @@ function CTABanner() {
         <p style={{ color: 'rgba(255,255,255,.75)', fontSize: '1rem', marginBottom: 36 }}>
           Konsultasi gratis, tanpa biaya pendaftaran. Kami siap membantu.
         </p>
-        <a href={WA} target="_blank" rel="noopener noreferrer" className="btn btn-gold btn-lg">
+        <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-gold btn-lg">
           Mulai Konsultasi Gratis
         </a>
       </div>
@@ -466,17 +456,56 @@ function CTABanner() {
 }
 
 /* ─── PAGE ─────────────────────────────────────────────────── */
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient()
+  const content = await getSiteContent()
+  const privatePrograms = getJsonSiteValue(content, 'program_private_items', DEFAULT_PRIVATE_PROGRAMS)
+  const onlinePrograms = getJsonSiteValue(content, 'program_online_items', DEFAULT_ONLINE_PROGRAMS)
+  const signaturePrograms = getJsonSiteValue(content, 'signature_programs', DEFAULT_SIGNATURE_PROGRAMS)
+  const waUrl = buildWhatsAppUrl(
+    getSiteValue(content, 'wa_number'),
+    'Hallo Trinity Academy, saya ingin konsultasi.',
+  )
+
+  const [tutorsResult, testimonialsResult] = await Promise.all([
+    supabase
+      .from('tutors')
+      .select('id,name,role,jenjang,bio,mapel,photo_url,active,order')
+      .eq('active', true)
+      .order('order', { ascending: true })
+      .limit(3),
+    supabase
+      .from('testimonials')
+      .select('id,name,role,text,rating,active,created_at')
+      .eq('active', true)
+      .order('created_at', { ascending: false })
+      .limit(3),
+  ])
+
+  if (tutorsResult.error) {
+    console.error('Failed to load homepage tutors:', tutorsResult.error)
+  }
+
+  if (testimonialsResult.error) {
+    console.error('Failed to load homepage testimonials:', testimonialsResult.error)
+  }
+
+  const tutors = tutorsResult.data ?? []
+  const testimonials = testimonialsResult.data ?? []
+
   return (
     <>
-      <Hero />
-      <PreviewAbout />
-      <PreviewProgram />
-      <MapelSection />
-      <PreviewSignature />
-      <PreviewTutor />
-      <Testimoni />
-      <CTABanner />
+      <Hero content={content} waUrl={waUrl} />
+      <PreviewAbout content={content} />
+      <PreviewProgram privatePrograms={privatePrograms} onlinePrograms={onlinePrograms} />
+      <MapelSection waUrl={waUrl} />
+      <PreviewSignature programs={signaturePrograms} />
+      <PreviewTutor tutors={tutors} />
+      <Testimoni testimonials={testimonials} />
+      <CTABanner waUrl={waUrl} />
     </>
   )
 }
+
+
+

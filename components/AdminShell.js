@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -13,7 +13,7 @@ const navItems = [
 ]
 
 export default function AdminShell({ children }) {
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router   = useRouter()
   const pathname = usePathname()
   const [user, setUser]     = useState(null)
@@ -34,7 +34,7 @@ export default function AdminShell({ children }) {
       setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
-  }, [pathname])
+  }, [pathname, router, supabase.auth])
 
   // Login page — bersih tanpa sidebar
   if (!ready) {
@@ -121,13 +121,13 @@ export default function AdminShell({ children }) {
       </aside>
 
       {/* ── Main content ── */}
-      <div style={{ marginLeft: 228, flex: 1, minHeight: '100vh', background: '#f8fafd' }}>
+      <div style={{ marginLeft: 228, flex: 1, minWidth: 0, minHeight: '100vh', background: '#f8fafd', overflowX: 'hidden' }}>
         {/* Top bar */}
         <div style={{
           height: 56, background: 'white',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex', alignItems: 'center',
-          padding: '0 32px',
+          padding: '0 clamp(16px, 2.4vw, 32px)',
           position: 'sticky', top: 0, zIndex: 40,
         }}>
           <span style={{ fontSize: '.82rem', color: '#94a3b8' }}>
@@ -135,14 +135,14 @@ export default function AdminShell({ children }) {
           </span>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
             <Link href="/" target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: '.8rem', color: '#1a56c4', fontWeight: 600, textDecoration: 'none', padding: '6px 14px', border: '1.5px solid #1a56c4', borderRadius: 50 }}>
+              style={{ fontSize: '.8rem', color: '#1a56c4', fontWeight: 600, textDecoration: 'none', padding: '6px 14px', border: '1.5px solid #1a56c4', borderRadius: 50, whiteSpace: 'nowrap' }}>
               Lihat Website →
             </Link>
           </div>
         </div>
 
         {/* Page content */}
-        <div style={{ padding: 32, maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ padding: 'clamp(16px, 2.4vw, 32px)', width: '100%', maxWidth: 1280, margin: '0 auto', minWidth: 0 }}>
           {children}
         </div>
       </div>

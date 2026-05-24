@@ -335,7 +335,7 @@ export default function AdminContent() {
     );
 
   return (
-    <div style={{ padding: 36 }}>
+    <div style={{ padding: "clamp(18px, 2.5vw, 36px)", minWidth: 0 }}>
       {toast && (
         <div
           style={{
@@ -360,6 +360,8 @@ export default function AdminContent() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          gap: 18,
+          flexWrap: "wrap",
           marginBottom: 32,
         }}
       >
@@ -382,6 +384,7 @@ export default function AdminContent() {
           onClick={handleSaveAll}
           disabled={Boolean(savingTarget)}
           className="btn btn-primary btn-lg"
+          style={{ marginLeft: "auto" }}
         >
           {savingTarget === "all" ? "Menyimpan..." : "Simpan Semua Perubahan"}
         </button>
@@ -616,6 +619,17 @@ export default function AdminContent() {
           />
         )}
       </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .admin-content-fields {
+            grid-template-columns: 1fr !important;
+          }
+          .admin-content-upload {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -835,7 +849,14 @@ function ListEditor({
                 </button>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 14 }}>
+              <div
+                className="admin-content-fields"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                  gap: 14,
+                }}
+              >
                 {fields.map((field) => {
                   const rawValue = item[field.key] ?? "";
                   const value = Array.isArray(rawValue) ? rawValue.join("\n") : rawValue;
@@ -853,7 +874,10 @@ function ListEditor({
                   return (
                     <div
                       key={field.key}
-                      style={{ gridColumn: field.multiline ? "1 / -1" : "auto" }}
+                      style={{
+                        gridColumn: field.multiline ? "1 / -1" : "auto",
+                        minWidth: 0,
+                      }}
                     >
                       <label
                         style={{
@@ -891,10 +915,11 @@ function ListEditor({
 
               {onUploadPhoto && (
                 <div
+                  className="admin-content-upload"
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "96px 1fr",
-                    gap: 14,
+                    gridTemplateColumns: "120px 1fr",
+                    gap: 16,
                     alignItems: "center",
                     marginTop: 16,
                     paddingTop: 16,
@@ -904,14 +929,16 @@ function ListEditor({
                   <div
                     aria-label="Preview foto founder"
                     style={{
-                      width: 96,
-                      height: 96,
-                      borderRadius: 12,
-                      border: "1px solid var(--gray-200)",
-                      backgroundColor: "var(--off-white)",
+                      width: 120,
+                      height: 120,
+                      borderRadius: "50%",
+                      border: "4px solid white",
+                      backgroundColor: "var(--blue-pale)",
                       backgroundImage: item.photo_url ? `url("${item.photo_url}")` : "none",
                       backgroundPosition: "center",
-                      backgroundSize: "cover",
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "contain",
+                      boxShadow: "0 10px 24px rgba(8, 21, 42, .12)",
                     }}
                   />
                   <div>
@@ -922,7 +949,9 @@ function ListEditor({
                         color: "var(--gray-500)",
                       }}
                     >
-                      Preview akan berubah setelah file berhasil diupload.
+                      Preview bulat akan berubah setelah file berhasil diupload.
+                      Gunakan foto 1:1 minimal 800x800 px, JPG/PNG/WebP, wajah di tengah,
+                      dan sisakan ruang di atas serta sisi kepala.
                     </p>
                     <label style={uploadButton}>
                       Upload Foto Founder

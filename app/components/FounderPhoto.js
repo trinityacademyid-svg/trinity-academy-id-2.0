@@ -7,7 +7,8 @@ export default function FounderPhoto({ src, alt }) {
       src={src}
       alt={alt}
       fill
-      style={{ objectFit: 'cover', objectPosition: 'top' }}
+      sizes="(max-width: 800px) 220px, 260px"
+      style={{ objectFit: 'contain', objectPosition: 'center' }}
       onError={(e) => { e.target.style.display = 'none' }}
     />
   )

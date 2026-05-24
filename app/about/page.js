@@ -327,14 +327,26 @@ export default async function AboutPage() {
                 boxShadow: 'var(--shadow)',
               }}>
                 {/* Photo area */}
-                <div style={{ position: 'relative', aspectRatio: '4/3', background: 'var(--blue-pale)', overflow: 'hidden' }}>
-                  <FounderPhoto src={f.photo_url || f.photo || '/images/maskot.png'} alt={`Foto ${f.name}`} />
+                <div style={{ position: 'relative', minHeight: 300, background: 'var(--blue-pale)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+                  <div style={{
+                    position: 'relative',
+                    width: 'min(220px, 72vw)',
+                    aspectRatio: '1 / 1',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    background: 'white',
+                    border: '5px solid white',
+                    boxShadow: '0 18px 40px rgba(8,21,42,.16)',
+                    zIndex: 1,
+                  }}>
+                    <FounderPhoto src={f.photo_url || f.photo || '/images/maskot.png'} alt={`Foto ${f.name}`} />
+                  </div>
                   {/* Placeholder shown before photo uploaded */}
                   <div style={{
                     position: 'absolute', inset: 0,
                     display: 'flex', flexDirection: 'column',
                     alignItems: 'center', justifyContent: 'center',
-                    color: 'var(--blue)', opacity: .35,
+                    color: 'var(--blue)', opacity: .18,
                     fontFamily: "'Plus Jakarta Sans',sans-serif",
                   }}>
                     <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">

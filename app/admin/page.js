@@ -1,32 +1,15 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+
+import { useActionState } from "react";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
+import { loginAdmin } from "./actions";
+
+const initialState = {
+  error: "",
+};
 
 export default function AdminLogin() {
-  const supabase = createClient();
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function handleLogin(e) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      setError("Email atau password salah. Coba lagi.");
-      setLoading(false);
-    } else {
-      router.push("/admin/dashboard");
-    }
-  }
+  const [state, formAction, pending] = useActionState(loginAdmin, initialState);
 
   return (
     <div
@@ -49,7 +32,6 @@ export default function AdminLogin() {
           boxShadow: "0 24px 60px rgba(0,0,0,.3)",
         }}
       >
-        {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <div
             style={{
@@ -120,16 +102,15 @@ export default function AdminLogin() {
         </div>
 
         <form
-          onSubmit={handleLogin}
+          action={formAction}
           style={{ display: "flex", flexDirection: "column", gap: 18 }}
         >
           <div>
             <label style={labelStyle}>Email</label>
             <input
+              name="email"
               type="email"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@trinityacademy.id"
               style={inputStyle}
             />
@@ -137,16 +118,15 @@ export default function AdminLogin() {
           <div>
             <label style={labelStyle}>Password</label>
             <input
+              name="password"
               type="password"
               required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="********"
               style={inputStyle}
             />
           </div>
 
-          {error && (
+          {state.error && (
             <div
               style={{
                 background: "#fef2f2",
@@ -157,13 +137,13 @@ export default function AdminLogin() {
                 color: "#dc2626",
               }}
             >
-              {error}
+              {state.error}
             </div>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={pending}
             style={{
               background: "var(--blue)",
               color: "white",
@@ -172,14 +152,14 @@ export default function AdminLogin() {
               padding: "14px",
               fontWeight: 700,
               fontSize: "1rem",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
+              cursor: pending ? "not-allowed" : "pointer",
+              opacity: pending ? 0.7 : 1,
               transition: "all .2s",
               marginTop: 4,
               fontFamily: "inherit",
             }}
           >
-            {loading ? "Masuk..." : "Masuk ke Dashboard"}
+            {pending ? "Masuk..." : "Masuk ke Dashboard"}
           </button>
         </form>
 
@@ -205,6 +185,7 @@ const labelStyle = {
   color: "var(--gray-800)",
   marginBottom: 6,
 };
+
 const inputStyle = {
   width: "100%",
   padding: "12px 16px",

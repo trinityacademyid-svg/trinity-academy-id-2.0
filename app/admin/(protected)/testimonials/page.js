@@ -1,11 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const EMPTY = { name: "", role: "", text: "", rating: 5, active: true };
 
 export default function AdminTestimonials() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
@@ -14,8 +14,8 @@ export default function AdminTestimonials() {
   const [showForm, setShowForm] = useState(false);
   const [toast, setToast] = useState("");
 
-  async function load() {
-    setLoading(true);
+  async function load(options = {}) {
+    if (options.withLoading) setLoading(true);
     const { data, error } = await supabase
       .from("testimonials")
       .select("*")
@@ -29,9 +29,34 @@ export default function AdminTestimonials() {
     }
     setLoading(false);
   }
+
   useEffect(() => {
-    load();
-  }, []);
+    let mounted = true;
+
+    async function loadTestimonials() {
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!mounted) return;
+
+      if (error) {
+        console.error("Load testimonials error:", error);
+        setToast("Gagal memuat testimoni: " + error.message);
+        setTimeout(() => setToast(""), 3000);
+        setItems([]);
+      } else {
+        setItems(data ?? []);
+      }
+      setLoading(false);
+    }
+
+    loadTestimonials();
+
+    return () => {
+      mounted = false;
+    };
+  }, [supabase]);
 
   function showToast(msg) {
     setToast(msg);
@@ -72,7 +97,7 @@ export default function AdminTestimonials() {
   }
 
   return (
-    <div style={{ padding: 36 }}>
+    <div className="px-4 sm:px-6 lg:px-9 py-6">
       {toast && (
         <div
           style={{
@@ -97,8 +122,11 @@ export default function AdminTestimonials() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 28,
+          gap: 16,
+          marginBottom: 24,
+          flexWrap: "wrap",
         }}
+        className="sm:flex-row"
       >
         <div>
           <h1
@@ -360,7 +388,7 @@ export default function AdminTestimonials() {
                   marginBottom: 14,
                 }}
               >
-                "{t.text}"
+                {`"${t.text}"`}
               </p>
               <div
                 style={{

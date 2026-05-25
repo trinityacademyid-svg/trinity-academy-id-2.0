@@ -140,7 +140,8 @@ const CONTENT_CATEGORIES = [
   {
     id: "private-programs",
     title: "Program Les Private",
-    description: "Daftar program yang tampil di halaman Program dan preview homepage.",
+    description:
+      "Daftar program yang tampil di halaman Program dan preview homepage.",
     type: "list",
     keys: ["program_private_items"],
   },
@@ -266,7 +267,7 @@ export default function AdminContent() {
   function parseJsonList(key) {
     try {
       const parsed = JSON.parse(content[key] || "[]");
-      return Array.isArray(parsed) ? parsed : JSON_DEFAULTS[key] ?? [];
+      return Array.isArray(parsed) ? parsed : (JSON_DEFAULTS[key] ?? []);
     } catch (error) {
       console.error(`Invalid JSON for ${key}:`, error);
       return JSON_DEFAULTS[key] ?? [];
@@ -335,7 +336,7 @@ export default function AdminContent() {
     );
 
   return (
-    <div style={{ padding: "clamp(18px, 2.5vw, 36px)", minWidth: 0 }}>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-20 md:pb-6">
       {toast && (
         <div
           style={{
@@ -362,8 +363,9 @@ export default function AdminContent() {
           alignItems: "center",
           gap: 18,
           flexWrap: "wrap",
-          marginBottom: 32,
+          marginBottom: 24,
         }}
+        className="sm:flex-row"
       >
         <div>
           <h1
@@ -383,8 +385,7 @@ export default function AdminContent() {
         <button
           onClick={handleSaveAll}
           disabled={Boolean(savingTarget)}
-          className="btn btn-primary btn-lg"
-          style={{ marginLeft: "auto" }}
+          className="btn btn-primary btn-lg whitespace-nowrap"
         >
           {savingTarget === "all" ? "Menyimpan..." : "Simpan Semua Perubahan"}
         </button>
@@ -395,18 +396,20 @@ export default function AdminContent() {
           position: "sticky",
           top: 0,
           zIndex: 20,
-          marginBottom: 24,
-          padding: "14px 0",
+          marginBottom: 20,
+          padding: "12px 0",
           background: "var(--off-white, #f8fafc)",
         }}
+        className="sm:padding-4"
       >
         <div
           style={{
             display: "flex",
-            gap: 10,
+            gap: 8,
             overflowX: "auto",
             paddingBottom: 4,
           }}
+          className="sm:gap-2"
         >
           {CONTENT_CATEGORIES.map((category) => {
             const active = category.id === activeCategory.id;
@@ -420,8 +423,13 @@ export default function AdminContent() {
                   background: active ? "var(--navy)" : "white",
                   color: active ? "white" : "var(--gray-700)",
                   borderColor: active ? "var(--navy)" : "var(--gray-200)",
-                  boxShadow: active ? "0 10px 24px rgba(15, 23, 42, .16)" : "none",
+                  boxShadow: active
+                    ? "0 10px 24px rgba(15, 23, 42, .16)"
+                    : "none",
+                  fontSize: ".75rem",
+                  padding: "8px 12px",
                 }}
+                className="sm:text-sm sm:px-3 sm:py-2"
               >
                 {category.title}
               </button>
@@ -430,7 +438,10 @@ export default function AdminContent() {
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+      <div
+        style={{ display: "flex", flexDirection: "column", gap: 20 }}
+        className="sm:gap-7"
+      >
         {activeCategory.type === "fields" && (
           <FieldGroup
             group={activeCategory}
@@ -485,7 +496,12 @@ export default function AdminContent() {
               { key: "title", label: "Nama Program" },
               { key: "jenjang", label: "Jenjang" },
               { key: "desc", label: "Deskripsi", multiline: true },
-              { key: "features", label: "Fitur", mode: "list", multiline: true },
+              {
+                key: "features",
+                label: "Fitur",
+                mode: "list",
+                multiline: true,
+              },
             ]}
             onChange={(index, field, value, mode) =>
               updateJsonItem("program_private_items", index, field, value, mode)
@@ -523,7 +539,9 @@ export default function AdminContent() {
                 desc: "Deskripsi benefit.",
               })
             }
-            onRemove={(index) => removeJsonItem("program_private_benefits", index)}
+            onRemove={(index) =>
+              removeJsonItem("program_private_benefits", index)
+            }
             onSave={() => handleSaveCategory(activeCategory)}
             saving={savingTarget === activeCategory.id}
             disabled={Boolean(savingTarget)}
@@ -539,7 +557,12 @@ export default function AdminContent() {
               { key: "title", label: "Nama Program" },
               { key: "jenjang", label: "Jenjang" },
               { key: "desc", label: "Deskripsi", multiline: true },
-              { key: "features", label: "Fitur", mode: "list", multiline: true },
+              {
+                key: "features",
+                label: "Fitur",
+                mode: "list",
+                multiline: true,
+              },
             ]}
             onChange={(index, field, value, mode) =>
               updateJsonItem("program_online_items", index, field, value, mode)
@@ -577,7 +600,9 @@ export default function AdminContent() {
                 desc: "Deskripsi benefit.",
               })
             }
-            onRemove={(index) => removeJsonItem("program_online_benefits", index)}
+            onRemove={(index) =>
+              removeJsonItem("program_online_benefits", index)
+            }
             onSave={() => handleSaveCategory(activeCategory)}
             saving={savingTarget === activeCategory.id}
             disabled={Boolean(savingTarget)}
@@ -843,7 +868,11 @@ function ListEditor({
                 <button
                   type="button"
                   onClick={() => onRemove(index)}
-                  style={{ ...smallButton, background: "#fee2e2", color: "#dc2626" }}
+                  style={{
+                    ...smallButton,
+                    background: "#fee2e2",
+                    color: "#dc2626",
+                  }}
                 >
                   Hapus
                 </button>
@@ -859,7 +888,9 @@ function ListEditor({
               >
                 {fields.map((field) => {
                   const rawValue = item[field.key] ?? "";
-                  const value = Array.isArray(rawValue) ? rawValue.join("\n") : rawValue;
+                  const value = Array.isArray(rawValue)
+                    ? rawValue.join("\n")
+                    : rawValue;
                   const controlStyle = {
                     width: "100%",
                     padding: "10px 12px",
@@ -895,7 +926,12 @@ function ListEditor({
                           value={value}
                           rows={field.mode === "list" ? 3 : 4}
                           onChange={(event) =>
-                            onChange(index, field.key, event.target.value, field.mode)
+                            onChange(
+                              index,
+                              field.key,
+                              event.target.value,
+                              field.mode,
+                            )
                           }
                           style={{ ...controlStyle, resize: "vertical" }}
                         />
@@ -903,7 +939,12 @@ function ListEditor({
                         <input
                           value={value}
                           onChange={(event) =>
-                            onChange(index, field.key, event.target.value, field.mode)
+                            onChange(
+                              index,
+                              field.key,
+                              event.target.value,
+                              field.mode,
+                            )
                           }
                           style={controlStyle}
                         />
@@ -934,7 +975,9 @@ function ListEditor({
                       borderRadius: "50%",
                       border: "4px solid white",
                       backgroundColor: "var(--blue-pale)",
-                      backgroundImage: item.photo_url ? `url("${item.photo_url}")` : "none",
+                      backgroundImage: item.photo_url
+                        ? `url("${item.photo_url}")`
+                        : "none",
                       backgroundPosition: "center",
                       backgroundRepeat: "no-repeat",
                       backgroundSize: "contain",
@@ -950,8 +993,8 @@ function ListEditor({
                       }}
                     >
                       Preview bulat akan berubah setelah file berhasil diupload.
-                      Gunakan foto 1:1 minimal 800x800 px, JPG/PNG/WebP, wajah di tengah,
-                      dan sisakan ruang di atas serta sisi kepala.
+                      Gunakan foto 1:1 minimal 800x800 px, JPG/PNG/WebP, wajah
+                      di tengah, dan sisakan ruang di atas serta sisi kepala.
                     </p>
                     <label style={uploadButton}>
                       Upload Foto Founder

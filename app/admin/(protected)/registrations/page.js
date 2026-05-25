@@ -90,7 +90,7 @@ export default function AdminRegistrations() {
   };
 
   return (
-    <div style={{ padding: 36 }}>
+    <div className="px-4 sm:px-6 lg:px-9 py-6">
       {toast && (
         <div
           style={{
@@ -110,7 +110,7 @@ export default function AdminRegistrations() {
         </div>
       )}
 
-      <div style={{ marginBottom: 28 }}>
+      <div className="mb-6 md:mb-7">
         <h1
           style={{
             fontFamily: "'Playfair Display',serif",
@@ -126,14 +126,15 @@ export default function AdminRegistrations() {
         </p>
       </div>
 
-      {/* Mini stats */}
+      {/* Mini stats — responsive: 2 cols on mobile, 4 on desktop */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4,1fr)",
-          gap: 14,
-          marginBottom: 24,
+          gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+          gap: 10,
+          marginBottom: 20,
         }}
+        className="sm:gap-3 md:gap-4"
       >
         {[
           ["Total", stats.total, "#1a56c4"],
@@ -147,17 +148,19 @@ export default function AdminRegistrations() {
               background: "white",
               border: "1px solid var(--gray-200)",
               borderRadius: "var(--radius)",
-              padding: "16px 20px",
+              padding: "12px 14px",
               boxShadow: "var(--shadow-sm)",
             }}
+            className="sm:p-4"
           >
             <div
               style={{
                 fontFamily: "'Playfair Display',serif",
-                fontSize: "1.8rem",
+                fontSize: "1.5rem",
                 fontWeight: 900,
                 color: c,
               }}
+              className="sm:text-2xl"
             >
               {v}
             </div>
@@ -167,6 +170,7 @@ export default function AdminRegistrations() {
                 color: "var(--gray-600)",
                 fontWeight: 600,
               }}
+              className="text-xs sm:text-sm"
             >
               {l}
             </div>
@@ -174,15 +178,16 @@ export default function AdminRegistrations() {
         ))}
       </div>
 
-      {/* Filters */}
+      {/* Filters — responsive: stack on mobile, row on desktop */}
       <div
         style={{
           display: "flex",
-          gap: 12,
-          marginBottom: 20,
+          gap: 10,
+          marginBottom: 16,
           flexWrap: "wrap",
           alignItems: "center",
         }}
+        className="sm:gap-3"
       >
         <input
           value={search}
@@ -191,31 +196,42 @@ export default function AdminRegistrations() {
           style={{
             flex: 1,
             minWidth: 200,
-            padding: "10px 16px",
+            padding: "9px 14px",
             borderRadius: 9,
             border: "1.5px solid var(--gray-200)",
             fontSize: ".9rem",
             fontFamily: "inherit",
             outline: "none",
           }}
+          className="min-w-fit sm:py-2 sm:px-4"
         />
-        <div style={{ display: "flex", gap: 6 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            overflowX: "auto",
+            flexWrap: "wrap",
+          }}
+          className="sm:gap-2"
+        >
           {["semua", "baru", "diproses", "selesai", "batal"].map((s) => (
             <button
               key={s}
               onClick={() => setFilterStatus(s)}
               style={{
-                padding: "9px 16px",
+                padding: "8px 12px",
                 borderRadius: 50,
                 border: `1.5px solid ${filterStatus === s ? "var(--blue)" : "var(--gray-200)"}`,
                 background: filterStatus === s ? "var(--blue)" : "white",
                 color: filterStatus === s ? "white" : "var(--gray-600)",
                 fontWeight: 600,
-                fontSize: ".8rem",
+                fontSize: ".75rem",
                 cursor: "pointer",
                 textTransform: "capitalize",
                 fontFamily: "inherit",
+                whiteSpace: "nowrap",
               }}
+              className="text-xs sm:text-sm sm:px-4 sm:py-2"
             >
               {s}
             </button>
@@ -223,12 +239,14 @@ export default function AdminRegistrations() {
         </div>
       </div>
 
+      {/* Main grid — responsive: full-width on mobile, 2-col on lg */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: selected ? "1fr 340px" : "1fr",
-          gap: 20,
+          gridTemplateColumns: selected ? "1fr" : "1fr",
+          gap: 16,
         }}
+        className="lg:gap-5"
       >
         {/* Table */}
         <div
@@ -238,7 +256,9 @@ export default function AdminRegistrations() {
             border: "1px solid var(--gray-200)",
             overflow: "hidden",
             boxShadow: "var(--shadow-sm)",
+            overflowX: "auto",
           }}
+          className="overflow-x-auto"
         >
           {loading ? (
             <div
@@ -261,168 +281,183 @@ export default function AdminRegistrations() {
               Tidak ada data yang sesuai.
             </div>
           ) : (
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: ".87rem",
-              }}
-            >
-              <thead>
-                <tr style={{ background: "var(--gray-100)" }}>
-                  {[
-                    "Nama",
-                    "Kelas",
-                    "Mata Pelajaran",
-                    "Wilayah",
-                    "Status",
-                    "Tanggal",
-                    "Aksi",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      style={{
-                        padding: "11px 16px",
-                        textAlign: "left",
-                        color: "var(--gray-600)",
-                        fontWeight: 600,
-                        fontSize: ".74rem",
-                        letterSpacing: ".04em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r, i) => {
-                  const sc = STATUS_COLORS[r.status] ?? STATUS_COLORS.baru;
-                  return (
-                    <tr
-                      key={r.id}
-                      style={{
-                        borderTop: "1px solid var(--gray-200)",
-                        background:
-                          selected?.id === r.id
-                            ? "var(--blue-pale)"
-                            : i % 2 === 0
-                              ? "white"
-                              : "var(--off-white)",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => setSelected(r)}
-                    >
-                      <td
+            <div className="overflow-x-auto">
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: ".87rem",
+                  minWidth: "700px",
+                }}
+              >
+                <thead>
+                  <tr style={{ background: "var(--gray-100)" }}>
+                    {[
+                      "Nama",
+                      "Kelas",
+                      "Mata Pelajaran",
+                      "Wilayah",
+                      "Status",
+                      "Tanggal",
+                      "Aksi",
+                    ].map((h) => (
+                      <th
+                        key={h}
                         style={{
-                          padding: "12px 16px",
-                          fontWeight: 700,
-                          color: "var(--navy)",
-                        }}
-                      >
-                        {r.name}
-                      </td>
-                      <td
-                        style={{
-                          padding: "12px 16px",
+                          padding: "10px 14px",
+                          textAlign: "left",
                           color: "var(--gray-600)",
+                          fontWeight: 600,
+                          fontSize: ".72rem",
+                          letterSpacing: ".04em",
+                          textTransform: "uppercase",
                         }}
+                        className="px-3 sm:px-4 py-2 sm:py-3"
                       >
-                        {r.grade ?? "–"}
-                      </td>
-                      <td
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((r, i) => {
+                    const sc = STATUS_COLORS[r.status] ?? STATUS_COLORS.baru;
+                    return (
+                      <tr
+                        key={r.id}
                         style={{
-                          padding: "12px 16px",
-                          color: "var(--gray-600)",
+                          borderTop: "1px solid var(--gray-200)",
+                          background:
+                            selected?.id === r.id
+                              ? "var(--blue-pale)"
+                              : i % 2 === 0
+                                ? "white"
+                                : "var(--off-white)",
+                          cursor: "pointer",
                         }}
+                        onClick={() => setSelected(r)}
+                        className="hover:bg-blue-pale transition-colors"
                       >
-                        {r.subject ?? "–"}
-                      </td>
-                      <td
-                        style={{
-                          padding: "12px 16px",
-                          color: "var(--gray-600)",
-                        }}
-                      >
-                        {r.location ?? "–"}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <span
+                        <td
                           style={{
-                            fontSize: ".74rem",
+                            padding: "10px 14px",
                             fontWeight: 700,
-                            padding: "3px 10px",
-                            borderRadius: 50,
-                            background: sc.bg,
-                            color: sc.text,
-                            textTransform: "capitalize",
+                            color: "var(--navy)",
                           }}
+                          className="px-3 sm:px-4 py-2 sm:py-3"
                         >
-                          {r.status ?? "baru"}
-                        </span>
-                      </td>
-                      <td
-                        style={{
-                          padding: "12px 16px",
-                          color: "var(--gray-400)",
-                          fontSize: ".78rem",
-                        }}
-                      >
-                        {new Date(r.created_at).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(r.id);
-                          }}
+                          {r.name}
+                        </td>
+                        <td
                           style={{
-                            padding: "5px 12px",
-                            borderRadius: 6,
-                            border: "none",
-                            background: "#fee2e2",
-                            color: "#dc2626",
-                            fontWeight: 600,
-                            fontSize: ".74rem",
-                            cursor: "pointer",
-                            fontFamily: "inherit",
+                            padding: "10px 14px",
+                            color: "var(--gray-600)",
                           }}
+                          className="hidden sm:table-cell px-3 sm:px-4 py-2 sm:py-3"
                         >
-                          Hapus
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          {r.grade ?? "–"}
+                        </td>
+                        <td
+                          style={{
+                            padding: "10px 14px",
+                            color: "var(--gray-600)",
+                          }}
+                          className="hidden md:table-cell px-3 sm:px-4 py-2 sm:py-3"
+                        >
+                          {r.subject ?? "–"}
+                        </td>
+                        <td
+                          style={{
+                            padding: "10px 14px",
+                            color: "var(--gray-600)",
+                          }}
+                          className="hidden lg:table-cell px-3 sm:px-4 py-2 sm:py-3"
+                        >
+                          {r.location ?? "–"}
+                        </td>
+                        <td
+                          style={{ padding: "10px 14px" }}
+                          className="px-3 sm:px-4 py-2 sm:py-3"
+                        >
+                          <span
+                            style={{
+                              fontSize: ".72rem",
+                              fontWeight: 700,
+                              padding: "3px 8px",
+                              borderRadius: 50,
+                              background: sc.bg,
+                              color: sc.text,
+                              textTransform: "capitalize",
+                            }}
+                          >
+                            {r.status ?? "baru"}
+                          </span>
+                        </td>
+                        <td
+                          style={{
+                            padding: "10px 14px",
+                            color: "var(--gray-400)",
+                            fontSize: ".76rem",
+                          }}
+                          className="hidden sm:table-cell px-3 sm:px-4 py-2 sm:py-3"
+                        >
+                          {new Date(r.created_at).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                          })}
+                        </td>
+                        <td
+                          style={{ padding: "10px 14px" }}
+                          className="px-3 sm:px-4 py-2 sm:py-3"
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(r.id);
+                            }}
+                            style={{
+                              padding: "4px 10px",
+                              borderRadius: 6,
+                              border: "none",
+                              background: "#fee2e2",
+                              color: "#dc2626",
+                              fontWeight: 600,
+                              fontSize: ".7rem",
+                              cursor: "pointer",
+                              fontFamily: "inherit",
+                            }}
+                            className="text-xs sm:text-sm sm:px-3 sm:py-1"
+                          >
+                            Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
-        {/* Detail panel */}
+        {/* Detail panel — full-width below table on mobile, sidebar on lg */}
         {selected && (
           <div
             style={{
               background: "white",
               borderRadius: "var(--radius)",
               border: "1px solid var(--gray-200)",
-              padding: 24,
+              padding: 20,
               boxShadow: "var(--shadow-sm)",
-              alignSelf: "start",
-              position: "sticky",
-              top: 24,
             }}
+            className="p-5 lg:p-6 lg:sticky lg:top-80 lg:h-fit"
           >
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: 20,
+                marginBottom: 16,
               }}
             >
               <h3
@@ -456,10 +491,10 @@ export default function AdminRegistrations() {
               ["Catatan", selected.notes],
             ].map(([k, v]) =>
               v ? (
-                <div key={k} style={{ marginBottom: 14 }}>
+                <div key={k} style={{ marginBottom: 12 }}>
                   <p
                     style={{
-                      fontSize: ".74rem",
+                      fontSize: ".72rem",
                       fontWeight: 700,
                       color: "var(--gray-400)",
                       textTransform: "uppercase",
@@ -475,16 +510,17 @@ export default function AdminRegistrations() {
                       color: "var(--navy)",
                       fontWeight: k === "Nama" ? 700 : 400,
                     }}
+                    className="text-sm sm:text-base"
                   >
                     {v}
                   </p>
                 </div>
               ) : null,
             )}
-            <div style={{ marginBottom: 20 }}>
+            <div style={{ marginBottom: 16 }}>
               <p
                 style={{
-                  fontSize: ".74rem",
+                  fontSize: ".72rem",
                   fontWeight: 700,
                   color: "var(--gray-400)",
                   textTransform: "uppercase",
@@ -502,18 +538,19 @@ export default function AdminRegistrations() {
                       key={s}
                       onClick={() => updateStatus(selected.id, s)}
                       style={{
-                        padding: "7px 14px",
+                        padding: "6px 12px",
                         borderRadius: 50,
                         border: `1.5px solid ${selected.status === s ? sc.text : "var(--gray-200)"}`,
                         background: selected.status === s ? sc.bg : "white",
                         color:
                           selected.status === s ? sc.text : "var(--gray-500)",
                         fontWeight: 700,
-                        fontSize: ".78rem",
+                        fontSize: ".72rem",
                         cursor: "pointer",
                         textTransform: "capitalize",
                         fontFamily: "inherit",
                       }}
+                      className="text-xs sm:text-sm"
                     >
                       {s}
                     </button>
@@ -526,8 +563,8 @@ export default function AdminRegistrations() {
                 href={`https://wa.me/${selected.phone?.replace(/\D/g, "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-primary"
-                style={{ width: "100%", justifyContent: "center" }}
+                className="btn btn-primary w-full justify-center"
+                style={{ display: "flex" }}
               >
                 Hubungi via WhatsApp
               </a>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,7 +14,7 @@ const EMPTY = {
 };
 
 export default function AdminTutors() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [tutors, setTutors] = useState([]);
   const [form, setForm] = useState(EMPTY);
   const [editId, setEditId] = useState(null);
@@ -25,8 +25,8 @@ export default function AdminTutors() {
   const [toast, setToast] = useState("");
   const fileRef = useRef();
 
-  async function load() {
-    setLoading(true);
+  async function load(options = {}) {
+    if (options.withLoading) setLoading(true);
     const { data, error } = await supabase
       .from("tutors")
       .select("*")
@@ -42,8 +42,32 @@ export default function AdminTutors() {
   }
 
   useEffect(() => {
-    load();
-  }, []);
+    let mounted = true;
+
+    async function loadTutors() {
+      const { data, error } = await supabase
+        .from("tutors")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (!mounted) return;
+
+      if (error) {
+        console.error("Load tutors error:", error);
+        setToast("Gagal memuat tutor: " + error.message);
+        setTimeout(() => setToast(""), 3000);
+        setTutors([]);
+      } else {
+        setTutors(data ?? []);
+      }
+      setLoading(false);
+    }
+
+    loadTutors();
+
+    return () => {
+      mounted = false;
+    };
+  }, [supabase]);
 
   function showToast(msg) {
     setToast(msg);
@@ -121,7 +145,7 @@ export default function AdminTutors() {
   }
 
   return (
-    <div style={{ padding: "36px" }}>
+    <div className="px-4 sm:px-6 lg:px-9 py-6">
       {/* Toast */}
       {toast && (
         <div
@@ -148,8 +172,11 @@ export default function AdminTutors() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 28,
+          gap: 16,
+          marginBottom: 24,
+          flexWrap: "wrap",
         }}
+        className="sm:flex-row"
       >
         <div>
           <h1
@@ -172,14 +199,14 @@ export default function AdminTutors() {
             setEditId(null);
             setShowForm(true);
           }}
-          className="btn btn-primary"
+          className="btn btn-primary whitespace-nowrap"
           style={{ gap: 8 }}
         >
           + Tambah Tutor
         </button>
       </div>
 
-      {/* Form Modal */}
+      {/* Form Modal — responsive */}
       {showForm && (
         <div
           style={{
@@ -190,37 +217,44 @@ export default function AdminTutors() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: 24,
+            padding: 16,
           }}
+          className="sm:p-6"
         >
           <div
             style={{
               background: "white",
               borderRadius: "var(--radius-lg)",
-              padding: "36px",
+              padding: "28px",
               width: "100%",
               maxWidth: 560,
               maxHeight: "90vh",
               overflowY: "auto",
               boxShadow: "0 24px 60px rgba(0,0,0,.25)",
             }}
+            className="sm:p-9"
           >
             <h2
               style={{
                 fontFamily: "'Playfair Display',serif",
                 fontSize: "1.35rem",
                 color: "var(--navy)",
-                marginBottom: 24,
+                marginBottom: 20,
               }}
+              className="text-lg sm:text-2xl"
             >
               {editId ? "Edit Tutor" : "Tambah Tutor Baru"}
             </h2>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}
+              className="sm:gap-4"
+            >
               {/* Photo upload */}
               <div>
                 <label style={L}>Foto Tutor</label>
-                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}
+                  className="sm:gap-4"
+                >
                   <div
                     style={{
                       width: 72,
@@ -386,7 +420,7 @@ export default function AdminTutors() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table — responsive */}
       <div
         style={{
           background: "white",
@@ -395,6 +429,7 @@ export default function AdminTutors() {
           overflow: "hidden",
           boxShadow: "var(--shadow-sm)",
         }}
+        className="overflow-x-auto"
       >
         {loading ? (
           <div
@@ -417,87 +452,97 @@ export default function AdminTutors() {
             Belum ada tutor. Tambahkan tutor pertama.
           </div>
         ) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: ".87rem",
-            }}
-          >
-            <thead>
-              <tr style={{ background: "var(--gray-100)" }}>
-                {[
-                  "Foto",
-                  "Nama & Role",
-                  "Jenjang",
-                  "Mapel",
-                  "Status",
-                  "Aksi",
-                ].map((h) => (
-                  <th
-                    key={h}
+          <div className="overflow-x-auto">
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: ".87rem",
+                minWidth: "600px",
+              }}
+            >
+              <thead>
+                <tr style={{ background: "var(--gray-100)" }}>
+                  {[
+                    "Foto",
+                    "Nama & Role",
+                    "Jenjang",
+                    "Mapel",
+                    "Status",
+                    "Aksi",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      style={{
+                        padding: "11px 14px",
+                        textAlign: "left",
+                        color: "var(--gray-600)",
+                        fontWeight: 600,
+                        fontSize: ".72rem",
+                        letterSpacing: ".04em",
+                        textTransform: "uppercase",
+                      }}
+                      className="px-3 sm:px-4 py-2 sm:py-3"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {tutors.map((t, i) => (
+                  <tr
+                    key={t.id}
                     style={{
-                      padding: "12px 18px",
-                      textAlign: "left",
-                      color: "var(--gray-600)",
-                      fontWeight: 600,
-                      fontSize: ".76rem",
-                      letterSpacing: ".04em",
-                      textTransform: "uppercase",
+                      borderTop: "1px solid var(--gray-200)",
+                      background: i % 2 === 0 ? "white" : "var(--off-white)",
                     }}
                   >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {tutors.map((t, i) => (
-                <tr
-                  key={t.id}
-                  style={{
-                    borderTop: "1px solid var(--gray-200)",
-                    background: i % 2 === 0 ? "white" : "var(--off-white)",
-                  }}
-                >
-                  <td style={{ padding: "12px 18px" }}>
-                    <div
-                      style={{
-                        width: 42,
-                        height: 42,
-                        borderRadius: 10,
-                        background: "var(--blue-pale)",
-                        overflow: "hidden",
-                        position: "relative",
-                      }}
+                    <td style={{ padding: "11px 14px" }}
+                      className="px-3 sm:px-4 py-2 sm:py-3"
                     >
-                      {t.photo_url && (
-                        <Image
-                          src={t.photo_url}
-                          alt={t.name}
-                          fill
-                          style={{ objectFit: "cover" }}
-                        />
-                      )}
-                    </div>
-                  </td>
-                  <td style={{ padding: "12px 18px" }}>
-                    <div style={{ fontWeight: 700, color: "var(--navy)" }}>
-                      {t.name}
-                    </div>
-                    <div
-                      style={{ fontSize: ".78rem", color: "var(--gray-400)" }}
+                      <div
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 10,
+                          background: "var(--blue-pale)",
+                          overflow: "hidden",
+                          position: "relative",
+                        }}
+                      >
+                        {t.photo_url && (
+                          <Image
+                            src={t.photo_url}
+                            alt={t.name}
+                            fill
+                            style={{ objectFit: "cover" }}
+                          />
+                        )}
+                      </div>
+                    </td>
+                    <td style={{ padding: "11px 14px" }}
+                      className="px-3 sm:px-4 py-2 sm:py-3"
                     >
-                      {t.role}
-                    </div>
-                  </td>
-                  <td
-                    style={{ padding: "12px 18px", color: "var(--gray-600)" }}
-                  >
-                    {t.jenjang ?? "–"}
-                  </td>
-                  <td style={{ padding: "12px 18px" }}>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                      <div style={{ fontWeight: 700, color: "var(--navy)", fontSize: ".86rem" }}>
+                        {t.name}
+                      </div>
+                      <div
+                        style={{ fontSize: ".76rem", color: "var(--gray-400)" }}
+                      >
+                        {t.role}
+                      </div>
+                    </td>
+                    <td
+                      style={{ padding: "11px 14px", color: "var(--gray-600)", fontSize: ".85rem" }}
+                      className="hidden sm:table-cell px-3 sm:px-4 py-2 sm:py-3"
+                    >
+                      {t.jenjang ?? "–"}
+                    </td>
+                    <td style={{ padding: "11px 14px" }}
+                      className="hidden md:table-cell px-3 sm:px-4 py-2 sm:py-3"
+                    >
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                       {(Array.isArray(t.mapel) ? t.mapel : [])
                         .slice(0, 3)
                         .map((m, j) => (
@@ -559,6 +604,7 @@ export default function AdminTutors() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

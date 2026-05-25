@@ -96,7 +96,7 @@ export default async function Dashboard() {
 
   return (
     <>
-      <div style={{ marginBottom: 28 }}>
+      <div className="mb-6 md:mb-7">
         <h1
           style={{
             fontFamily: "'Playfair Display',serif",
@@ -127,14 +127,15 @@ export default async function Dashboard() {
         </div>
       )}
 
-      {/* Stat cards */}
+      {/* Stat cards — responsive grid: 2 cols on mobile, 4 on desktop */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4,1fr)",
-          gap: 16,
-          marginBottom: 28,
+          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+          gap: 12,
+          marginBottom: 24,
         }}
+        className="sm:gap-4"
       >
         {cards.map((c, i) => (
           <div
@@ -143,35 +144,41 @@ export default async function Dashboard() {
               background: "white",
               borderRadius: 12,
               border: "1px solid #e2e8f0",
-              padding: "20px",
+              padding: "16px 14px",
               boxShadow: "0 1px 4px rgba(0,0,0,.05)",
             }}
+            className="sm:p-5"
           >
             <div
               style={{
                 fontFamily: "'Playfair Display',serif",
-                fontSize: "2rem",
+                fontSize: "1.75rem",
                 fontWeight: 900,
                 color: c.color,
                 lineHeight: 1,
                 marginBottom: 6,
               }}
+              className="sm:text-2xl"
             >
               {c.value}
             </div>
             <div
               style={{ fontSize: ".84rem", fontWeight: 700, color: "#1e293b" }}
+              className="text-xs sm:text-sm"
             >
               {c.label}
             </div>
-            <div style={{ fontSize: ".75rem", color: c.color, marginTop: 2 }}>
+            <div
+              style={{ fontSize: ".75rem", color: c.color, marginTop: 2 }}
+              className="text-xs"
+            >
               {c.sub}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Recent registrations */}
+      {/* Recent registrations — table wrapper with responsive behavior */}
       <div
         style={{
           background: "white",
@@ -181,6 +188,7 @@ export default async function Dashboard() {
           boxShadow: "0 1px 4px rgba(0,0,0,.05)",
           marginBottom: 20,
         }}
+        className="overflow-x-auto"
       >
         <div
           style={{
@@ -189,6 +197,8 @@ export default async function Dashboard() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: 12,
+            flexWrap: "wrap",
           }}
         >
           <h2
@@ -202,7 +212,12 @@ export default async function Dashboard() {
           </h2>
           <Link
             href="/admin/registrations"
-            style={{ fontSize: ".82rem", color: "#1a56c4", fontWeight: 600 }}
+            style={{
+              fontSize: ".82rem",
+              color: "#1a56c4",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
           >
             Lihat semua →
           </Link>
@@ -219,17 +234,24 @@ export default async function Dashboard() {
             Belum ada pendaftar.
           </div>
         ) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: ".86rem",
-            }}
-          >
-            <thead>
-              <tr style={{ background: "#f8fafd" }}>
-                {["Nama", "Kelas", "Mata Pelajaran", "Wilayah", "Tanggal"].map(
-                  (h) => (
+          <div className="overflow-x-auto">
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: ".86rem",
+                minWidth: "600px",
+              }}
+            >
+              <thead>
+                <tr style={{ background: "#f8fafd" }}>
+                  {[
+                    "Nama",
+                    "Kelas",
+                    "Mata Pelajaran",
+                    "Wilayah",
+                    "Tanggal",
+                  ].map((h) => (
                     <th
                       key={h}
                       style={{
@@ -241,67 +263,80 @@ export default async function Dashboard() {
                         letterSpacing: ".04em",
                         textTransform: "uppercase",
                       }}
+                      className="px-3 sm:px-4 py-2 sm:py-3"
                     >
                       {h}
                     </th>
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {recent.map((r, i) => (
-                <tr
-                  key={r.id}
-                  style={{
-                    borderTop: "1px solid #f1f5f9",
-                    background: i % 2 === 0 ? "white" : "#f8fafd",
-                  }}
-                >
-                  <td
-                    style={{
-                      padding: "12px 18px",
-                      fontWeight: 600,
-                      color: "#08152a",
-                    }}
-                  >
-                    {r.name}
-                  </td>
-                  <td style={{ padding: "12px 18px", color: "#64748b" }}>
-                    {r.grade ?? "–"}
-                  </td>
-                  <td style={{ padding: "12px 18px", color: "#64748b" }}>
-                    {r.subject ?? "–"}
-                  </td>
-                  <td style={{ padding: "12px 18px", color: "#64748b" }}>
-                    {r.location ?? "–"}
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px 18px",
-                      color: "#94a3b8",
-                      fontSize: ".78rem",
-                    }}
-                  >
-                    {new Date(r.created_at).toLocaleDateString("id-ID", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </td>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recent.map((r, i) => (
+                  <tr
+                    key={r.id}
+                    style={{
+                      borderTop: "1px solid #f1f5f9",
+                      background: i % 2 === 0 ? "white" : "#f8fafd",
+                    }}
+                  >
+                    <td
+                      style={{
+                        padding: "12px 18px",
+                        fontWeight: 600,
+                        color: "#08152a",
+                      }}
+                      className="px-3 sm:px-4 py-2 sm:py-3"
+                    >
+                      {r.name}
+                    </td>
+                    <td
+                      style={{ padding: "12px 18px", color: "#64748b" }}
+                      className="px-3 sm:px-4 py-2 sm:py-3"
+                    >
+                      {r.grade ?? "–"}
+                    </td>
+                    <td
+                      style={{ padding: "12px 18px", color: "#64748b" }}
+                      className="hidden sm:table-cell px-3 sm:px-4 py-2 sm:py-3"
+                    >
+                      {r.subject ?? "–"}
+                    </td>
+                    <td
+                      style={{ padding: "12px 18px", color: "#64748b" }}
+                      className="hidden md:table-cell px-3 sm:px-4 py-2 sm:py-3"
+                    >
+                      {r.location ?? "–"}
+                    </td>
+                    <td
+                      style={{
+                        padding: "12px 18px",
+                        color: "#94a3b8",
+                        fontSize: ".78rem",
+                      }}
+                      className="px-3 sm:px-4 py-2 sm:py-3"
+                    >
+                      {new Date(r.created_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* Quick links */}
+      {/* Quick links — responsive grid: 2 cols on mobile, 4 on desktop */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4,1fr)",
-          gap: 12,
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: 10,
         }}
+        className="sm:gap-3"
       >
         {[
           { href: "/admin/tutors", label: "Tambah Tutor", color: "#10b981" },
@@ -329,12 +364,14 @@ export default async function Dashboard() {
               background: color + "12",
               border: `1px solid ${color}33`,
               borderRadius: 10,
-              padding: "13px 16px",
+              padding: "12px 14px",
               color,
               fontWeight: 700,
-              fontSize: ".85rem",
+              fontSize: ".8rem",
               textDecoration: "none",
+              textAlign: "center",
             }}
+            className="hover:opacity-80 transition-opacity sm:text-sm sm:p-3"
           >
             {label} →
           </Link>

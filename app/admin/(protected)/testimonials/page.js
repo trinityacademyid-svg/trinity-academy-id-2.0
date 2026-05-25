@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { withQueryTimeout } from "@/lib/supabase/query";
 
 const EMPTY = { name: "", role: "", text: "", rating: 5, active: true };
 
@@ -16,16 +17,25 @@ export default function AdminTestimonials() {
 
   async function load(options = {}) {
     if (options.withLoading) setLoading(true);
-    const { data, error } = await supabase
-      .from("testimonials")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
-      console.error("Load testimonials error:", error);
+    try {
+      const { data, error } = await withQueryTimeout(
+        supabase
+          .from("testimonials")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        "Data testimoni",
+      );
+      if (error) {
+        console.error("Load testimonials error:", error);
+        showToast("Gagal memuat testimoni: " + error.message);
+        setItems([]);
+      } else {
+        setItems(data ?? []);
+      }
+    } catch (error) {
+      console.error("Load testimonials timeout:", error);
       showToast("Gagal memuat testimoni: " + error.message);
       setItems([]);
-    } else {
-      setItems(data ?? []);
     }
     setLoading(false);
   }
@@ -34,19 +44,30 @@ export default function AdminTestimonials() {
     let mounted = true;
 
     async function loadTestimonials() {
-      const { data, error } = await supabase
-        .from("testimonials")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (!mounted) return;
+      try {
+        const { data, error } = await withQueryTimeout(
+          supabase
+            .from("testimonials")
+            .select("*")
+            .order("created_at", { ascending: false }),
+          "Data testimoni",
+        );
+        if (!mounted) return;
 
-      if (error) {
-        console.error("Load testimonials error:", error);
+        if (error) {
+          console.error("Load testimonials error:", error);
+          setToast("Gagal memuat testimoni: " + error.message);
+          setTimeout(() => setToast(""), 3000);
+          setItems([]);
+        } else {
+          setItems(data ?? []);
+        }
+      } catch (error) {
+        if (!mounted) return;
+        console.error("Load testimonials timeout:", error);
         setToast("Gagal memuat testimoni: " + error.message);
         setTimeout(() => setToast(""), 3000);
         setItems([]);
-      } else {
-        setItems(data ?? []);
       }
       setLoading(false);
     }
@@ -97,7 +118,7 @@ export default function AdminTestimonials() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-9 py-6">
+    <div className="admin-page px-4 sm:px-6 lg:px-9 py-6">
       {toast && (
         <div
           style={{
@@ -126,7 +147,7 @@ export default function AdminTestimonials() {
           marginBottom: 24,
           flexWrap: "wrap",
         }}
-        className="sm:flex-row"
+        className="admin-page-header"
       >
         <div>
           <h1
@@ -144,12 +165,13 @@ export default function AdminTestimonials() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => {
             setForm(EMPTY);
             setEditId(null);
             setShowForm(true);
           }}
-          className="btn btn-primary"
+          className="btn btn-primary admin-page-action"
         >
           + Tambah Testimoni
         </button>
@@ -326,6 +348,7 @@ export default function AdminTestimonials() {
         </div>
       ) : (
         <div
+          className="admin-card-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3,1fr)",

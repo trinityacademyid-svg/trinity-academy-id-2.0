@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { withQueryTimeout } from "@/lib/supabase/query";
 import {
   DEFAULT_FOUNDERS,
   DEFAULT_ONLINE_PROGRAMS,
@@ -195,25 +196,36 @@ export default function AdminContent() {
     let mounted = true;
 
     async function loadContent() {
-      const { data, error } = await supabase.from("site_content").select("*");
-      if (!mounted) return;
+      try {
+        const { data, error } = await withQueryTimeout(
+          supabase.from("site_content").select("*"),
+          "Konten website",
+        );
+        if (!mounted) return;
 
-      if (error) {
-        console.error("Load site content error:", error);
+        if (error) {
+          console.error("Load site content error:", error);
+          setToast("Gagal memuat konten: " + error.message);
+          setTimeout(() => setToast(""), 3000);
+          setContent({});
+        } else {
+          const map = {};
+          (data ?? []).forEach((row) => {
+            map[row.key] = row.value;
+          });
+          Object.entries(JSON_DEFAULTS).forEach(([key, value]) => {
+            if (!map[key]) {
+              map[key] = JSON.stringify(value, null, 2);
+            }
+          });
+          setContent(map);
+        }
+      } catch (error) {
+        if (!mounted) return;
+        console.error("Load site content timeout:", error);
         setToast("Gagal memuat konten: " + error.message);
         setTimeout(() => setToast(""), 3000);
         setContent({});
-      } else {
-        const map = {};
-        (data ?? []).forEach((row) => {
-          map[row.key] = row.value;
-        });
-        Object.entries(JSON_DEFAULTS).forEach(([key, value]) => {
-          if (!map[key]) {
-            map[key] = JSON.stringify(value, null, 2);
-          }
-        });
-        setContent(map);
       }
       setLoading(false);
     }
@@ -336,7 +348,7 @@ export default function AdminContent() {
     );
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 pb-20 md:pb-6">
+    <div className="admin-page px-4 sm:px-6 lg:px-8 py-6 pb-20 md:pb-6">
       {toast && (
         <div
           style={{
@@ -365,7 +377,7 @@ export default function AdminContent() {
           flexWrap: "wrap",
           marginBottom: 24,
         }}
-        className="sm:flex-row"
+        className="admin-page-header"
       >
         <div>
           <h1
@@ -385,7 +397,7 @@ export default function AdminContent() {
         <button
           onClick={handleSaveAll}
           disabled={Boolean(savingTarget)}
-          className="btn btn-primary btn-lg whitespace-nowrap"
+          className="btn btn-primary btn-lg whitespace-nowrap admin-page-action"
         >
           {savingTarget === "all" ? "Menyimpan..." : "Simpan Semua Perubahan"}
         </button>
@@ -394,13 +406,12 @@ export default function AdminContent() {
       <div
         style={{
           position: "sticky",
-          top: 0,
+          top: 56,
           zIndex: 20,
           marginBottom: 20,
           padding: "12px 0",
           background: "var(--off-white, #f8fafc)",
         }}
-        className="sm:padding-4"
       >
         <div
           style={{

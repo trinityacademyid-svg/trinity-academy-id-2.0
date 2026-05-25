@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { withQueryTimeout } from "@/lib/supabase/query";
 
 const EMPTY = {
   name: "",
@@ -27,16 +28,22 @@ export default function AdminTutors() {
 
   async function load(options = {}) {
     if (options.withLoading) setLoading(true);
-    const { data, error } = await supabase
-      .from("tutors")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
-      console.error("Load tutors error:", error);
+    try {
+      const { data, error } = await withQueryTimeout(
+        supabase.from("tutors").select("*").order("created_at", { ascending: false }),
+        "Data tutor",
+      );
+      if (error) {
+        console.error("Load tutors error:", error);
+        showToast("Gagal memuat tutor: " + error.message);
+        setTutors([]);
+      } else {
+        setTutors(data ?? []);
+      }
+    } catch (error) {
+      console.error("Load tutors timeout:", error);
       showToast("Gagal memuat tutor: " + error.message);
       setTutors([]);
-    } else {
-      setTutors(data ?? []);
     }
     setLoading(false);
   }
@@ -45,19 +52,30 @@ export default function AdminTutors() {
     let mounted = true;
 
     async function loadTutors() {
-      const { data, error } = await supabase
-        .from("tutors")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (!mounted) return;
+      try {
+        const { data, error } = await withQueryTimeout(
+          supabase
+            .from("tutors")
+            .select("*")
+            .order("created_at", { ascending: false }),
+          "Data tutor",
+        );
+        if (!mounted) return;
 
-      if (error) {
-        console.error("Load tutors error:", error);
+        if (error) {
+          console.error("Load tutors error:", error);
+          setToast("Gagal memuat tutor: " + error.message);
+          setTimeout(() => setToast(""), 3000);
+          setTutors([]);
+        } else {
+          setTutors(data ?? []);
+        }
+      } catch (error) {
+        if (!mounted) return;
+        console.error("Load tutors timeout:", error);
         setToast("Gagal memuat tutor: " + error.message);
         setTimeout(() => setToast(""), 3000);
         setTutors([]);
-      } else {
-        setTutors(data ?? []);
       }
       setLoading(false);
     }
@@ -145,7 +163,7 @@ export default function AdminTutors() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-9 py-6">
+    <div className="admin-page px-4 sm:px-6 lg:px-9 py-6">
       {/* Toast */}
       {toast && (
         <div
@@ -176,7 +194,7 @@ export default function AdminTutors() {
           marginBottom: 24,
           flexWrap: "wrap",
         }}
-        className="sm:flex-row"
+        className="admin-page-header"
       >
         <div>
           <h1
@@ -194,12 +212,13 @@ export default function AdminTutors() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => {
             setForm(EMPTY);
             setEditId(null);
             setShowForm(true);
           }}
-          className="btn btn-primary whitespace-nowrap"
+          className="btn btn-primary whitespace-nowrap admin-page-action"
           style={{ gap: 8 }}
         >
           + Tambah Tutor

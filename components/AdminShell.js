@@ -36,7 +36,7 @@ export default function AdminShell({ children }) {
 
   // Close menu when route changes
   useEffect(() => {
-    setMenuOpen(false);
+    queueMicrotask(() => setMenuOpen(false));
   }, [pathname]);
 
   // Login page — bersih tanpa sidebar
@@ -47,25 +47,26 @@ export default function AdminShell({ children }) {
 
   return (
     <div
-      className="min-h-screen bg-off-white font-sans"
+      className="min-h-screen bg-off-white font-sans md:flex"
       style={{ fontFamily: "'Plus Jakarta Sans',sans-serif" }}
     >
       {/* ── Mobile Overlay Backdrop ── */}
       {menuOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
           onClick={() => setMenuOpen(false)}
         />
       )}
 
       {/* ── Sidebar / Mobile Menu Drawer ── */}
       <aside
+        id="admin-sidebar"
         className={`
         fixed inset-y-0 left-0 w-64 bg-navy text-white
         flex flex-col border-r border-white/5
         transform transition-transform duration-300 ease-out
-        z-40
-        md:sticky md:w-56 lg:w-60
+        z-50
+        md:sticky md:top-0 md:h-screen md:w-56 lg:w-60 md:shrink-0
         ${menuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
       `}
       >
@@ -145,14 +146,17 @@ export default function AdminShell({ children }) {
       </aside>
 
       {/* ── Main content area ── */}
-      <div className="md:flex md:flex-col md:flex-1 pb-20 md:pb-0">
+      <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
         {/* Top bar */}
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-200 flex items-center gap-4 px-4 md:px-6 lg:px-8 h-14 md:h-16">
+        <div className="sticky top-0 z-30 bg-white border-b border-gray-200 flex items-center gap-3 px-3 sm:px-4 md:px-6 lg:px-8 h-14 md:h-16">
           {/* Hamburger menu - visible only on mobile */}
           <button
+            type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="relative z-10 md:hidden p-2 -ml-1 hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
             aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            aria-controls="admin-sidebar"
           >
             <svg
               className="w-5 h-5 text-gray-700"
@@ -191,19 +195,22 @@ export default function AdminShell({ children }) {
         </div>
 
         {/* Page content */}
-        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
-          <div className="w-full max-w-5xl mx-auto">{children}</div>
+        <div className="flex-1 min-w-0 px-4 py-4 sm:p-5 lg:p-8">
+          <div className="w-full max-w-6xl mx-auto admin-content-frame">
+            {children}
+          </div>
         </div>
       </div>
 
       {/* ── Mobile Bottom Action Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
         <div className="text-xs text-gray-600">
           <div className="font-semibold text-gray-800">
             {user?.email?.split("@")[0] ?? "Admin"}
           </div>
         </div>
         <button
+          type="button"
           onClick={logout}
           className="px-4 py-2 text-xs font-semibold rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 transition-colors"
         >
@@ -217,6 +224,31 @@ export default function AdminShell({ children }) {
         .text-gold { color: #c9920a; }
         .text-gray { color: #6b7280; }
         .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @media (max-width: 640px) {
+          .admin-page-header {
+            align-items: stretch !important;
+            gap: 12px !important;
+          }
+          .admin-page-header > div:first-child {
+            min-width: 0;
+            width: 100%;
+          }
+          .admin-page-header h1 {
+            font-size: 1.45rem !important;
+            line-height: 1.1 !important;
+            overflow-wrap: anywhere;
+          }
+          .admin-page-action {
+            width: 100%;
+            justify-content: center;
+            min-height: 44px;
+            padding-left: 18px;
+            padding-right: 18px;
+          }
+          .admin-card-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
       `}</style>
     </div>
   );

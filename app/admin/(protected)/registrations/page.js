@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { withQueryTimeout } from "@/lib/supabase/query";
 
 const STATUS_COLORS = {
   baru: { bg: "#dbeafe", text: "#1d4ed8" },
@@ -10,7 +11,7 @@ const STATUS_COLORS = {
 };
 
 export default function AdminRegistrations() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -18,29 +19,71 @@ export default function AdminRegistrations() {
   const [selected, setSelected] = useState(null);
   const [toast, setToast] = useState("");
 
-  async function load() {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("registrations")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
-      console.error("Load registrations error:", error);
-      showToast("Gagal memuat pendaftar: " + error.message);
-      setItems([]);
-    } else {
-      setItems(data ?? []);
-    }
-    setLoading(false);
-  }
-  useEffect(() => {
-    load();
-  }, []);
-
   function showToast(msg) {
     setToast(msg);
     setTimeout(() => setToast(""), 3000);
   }
+
+  async function load() {
+    setLoading(true);
+    try {
+      const { data, error } = await withQueryTimeout(
+        supabase
+          .from("registrations")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        "Data pendaftar",
+      );
+      if (error) {
+        console.error("Load registrations error:", error);
+        showToast("Gagal memuat pendaftar: " + error.message);
+        setItems([]);
+      } else {
+        setItems(data ?? []);
+      }
+    } catch (error) {
+      console.error("Load registrations timeout:", error);
+      showToast("Gagal memuat pendaftar: " + error.message);
+      setItems([]);
+    }
+    setLoading(false);
+  }
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRegistrations() {
+      try {
+        const { data, error } = await withQueryTimeout(
+          supabase
+            .from("registrations")
+            .select("*")
+            .order("created_at", { ascending: false }),
+          "Data pendaftar",
+        );
+        if (!mounted) return;
+
+        if (error) {
+          console.error("Load registrations error:", error);
+          showToast("Gagal memuat pendaftar: " + error.message);
+          setItems([]);
+        } else {
+          setItems(data ?? []);
+        }
+      } catch (error) {
+        if (!mounted) return;
+        console.error("Load registrations timeout:", error);
+        showToast("Gagal memuat pendaftar: " + error.message);
+        setItems([]);
+      }
+      setLoading(false);
+    }
+
+    loadRegistrations();
+
+    return () => {
+      mounted = false;
+    };
+  }, [supabase]);
 
   async function updateStatus(id, status) {
     const { error } = await supabase
@@ -90,7 +133,7 @@ export default function AdminRegistrations() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-9 py-6">
+    <div className="admin-page px-4 sm:px-6 lg:px-9 py-6">
       {toast && (
         <div
           style={{

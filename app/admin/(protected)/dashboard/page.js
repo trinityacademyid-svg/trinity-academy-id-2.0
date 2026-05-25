@@ -95,7 +95,7 @@ export default async function Dashboard() {
   ];
 
   return (
-    <>
+    <div className="admin-page">
       <div className="mb-6 md:mb-7">
         <h1
           style={{
@@ -377,6 +377,6 @@ export default async function Dashboard() {
           </Link>
         ))}
       </div>
-    </>
+    </div>
   );
 }

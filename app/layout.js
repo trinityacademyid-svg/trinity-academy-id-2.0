@@ -1,5 +1,6 @@
 import './globals.css'
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google'
+import { headers } from 'next/headers'
 import ConditionalLayout from '../components/ConditionalLayout'
 import {
   SITE_FALLBACKS,
@@ -27,7 +28,10 @@ export const metadata = {
 }
 
 export default async function RootLayout({ children }) {
-  const content = await getSiteContent()
+  const headerStore = await headers()
+  const pathname = headerStore.get('x-pathname') ?? ''
+  const isAdmin = pathname.startsWith('/admin')
+  const content = isAdmin ? {} : await getSiteContent()
   const contact = {
     waUrl: buildWhatsAppUrl(
       getSiteValue(content, 'wa_number'),

@@ -163,7 +163,7 @@ export default function AdminTutors() {
   }
 
   return (
-    <div className="admin-page px-4 sm:px-6 lg:px-9 py-6">
+    <div className="admin-page">
       {/* Toast */}
       {toast && (
         <div

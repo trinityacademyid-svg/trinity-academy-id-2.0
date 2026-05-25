@@ -98,7 +98,7 @@ export default async function SignaturePage() {
                     <span style={{ fontSize: '.72rem', fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--blue)' }}>{p.short}</span>
                   </div>
                   <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(1.6rem,3vw,2.2rem)', color: 'var(--navy)', lineHeight: 1.2, marginBottom: 10 }}>{p.title}</h2>
-                  <p style={{ fontSize: '.84rem', fontWeight: 700, fontStyle: 'italic', color: 'var(--gold)', marginBottom: 20 }}>"{p.tagline}"</p>
+                  <p style={{ fontSize: '.84rem', fontWeight: 700, fontStyle: 'italic', color: 'var(--gold)', marginBottom: 20 }}>&quot;{p.tagline}&quot;</p>
                   <div className="divider" style={{ marginBottom: 20 }} />
                   <p style={{ color: 'var(--gray-600)', lineHeight: 1.85, marginBottom: 28, fontSize: '.96rem' }}>{p.desc}</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -120,7 +120,7 @@ export default async function SignaturePage() {
                     {isEven && <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />}
                     <div style={{ position: 'relative' }}>
                       <p style={{ fontFamily: "'Playfair Display',serif", fontSize: '1rem', fontStyle: 'italic', color: isEven ? 'rgba(255,255,255,.8)' : 'var(--navy)', lineHeight: 1.75, marginBottom: 28 }}>
-                        "{p.tagline}"
+                        &quot;{p.tagline}&quot;
                       </p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                         {p.pillars.map((pl, j) => (

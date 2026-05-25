@@ -322,7 +322,7 @@ function PreviewSignature({ programs = [] }) {
                 {s.short}
               </div>
               <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.05rem', color: 'var(--navy)', marginBottom: 10 }}>{s.title}</h3>
-              <p style={{ fontSize: '.84rem', color: 'var(--gray-600)', fontStyle: 'italic', lineHeight: 1.6 }}>"{s.tagline}"</p>
+              <p style={{ fontSize: '.84rem', color: 'var(--gray-600)', fontStyle: 'italic', lineHeight: 1.6 }}>&quot;{s.tagline}&quot;</p>
             </div>
           ))}
         </div>
@@ -395,7 +395,7 @@ function Testimoni({ testimonials = [] }) {
                 {[...Array(5)].map((_, j) => <IconStar key={j} size={15} filled={j < (r.rating ?? 5)} />)}
               </div>
               <p style={{ fontSize: '.92rem', color: 'rgba(255,255,255,.78)', lineHeight: 1.75, fontStyle: 'italic', marginBottom: 22 }}>
-                "{r.text}"
+                &quot;{r.text}&quot;
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: '.95rem', fontFamily: "'Playfair Display',serif" }}>

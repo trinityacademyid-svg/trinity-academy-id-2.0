@@ -348,7 +348,7 @@ export default function AdminContent() {
     );
 
   return (
-    <div className="admin-page px-4 sm:px-6 lg:px-8 py-6 pb-20 md:pb-6">
+    <div className="admin-page">
       {toast && (
         <div
           style={{

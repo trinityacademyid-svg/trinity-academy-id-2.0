@@ -95,27 +95,26 @@ export default async function Dashboard() {
   ];
 
   return (
-    <div className="admin-page">
-      <div className="mb-6 md:mb-7">
-        <h1
-          style={{
-            fontFamily: "'Playfair Display',serif",
-            fontSize: "1.75rem",
-            color: "#08152a",
-            marginBottom: 4,
-          }}
-        >
-          Dashboard
-        </h1>
-        <p style={{ color: "#64748b", fontSize: ".88rem" }}>
-          Selamat datang kembali. Ini ringkasan terbaru Trinity Academy.
-        </p>
+    <div className="admin-page space-y-6">
+      <div className="admin-page-header">
+        <div>
+          <h1
+            style={{
+              fontFamily: "'Playfair Display',serif",
+              color: "#08152a",
+            }}
+          >
+            Dashboard
+          </h1>
+          <p style={{ color: "#64748b", fontSize: ".88rem" }}>
+            Selamat datang kembali. Ini ringkasan terbaru Trinity Academy.
+          </p>
+        </div>
       </div>
 
       {errorMessage && (
         <div
           style={{
-            marginBottom: 20,
             padding: 16,
             borderRadius: 12,
             background: "#fef3c7",
@@ -128,24 +127,17 @@ export default async function Dashboard() {
       )}
 
       {/* Stat cards — responsive grid: 2 cols on mobile, 4 on desktop */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: 12,
-          marginBottom: 24,
-        }}
-        className="sm:gap-4"
-      >
+      <div className="admin-card-grid">
         {cards.map((c, i) => (
           <div
             key={i}
             style={{
               background: "white",
-              borderRadius: 12,
+              borderRadius: 16,
               border: "1px solid #e2e8f0",
-              padding: "16px 14px",
+              padding: 20,
               boxShadow: "0 1px 4px rgba(0,0,0,.05)",
+              width: "100%",
             }}
             className="sm:p-5"
           >
@@ -186,13 +178,11 @@ export default async function Dashboard() {
           border: "1px solid #e2e8f0",
           overflow: "hidden",
           boxShadow: "0 1px 4px rgba(0,0,0,.05)",
-          marginBottom: 20,
         }}
-        className="overflow-x-auto"
       >
         <div
           style={{
-            padding: "16px 22px",
+            padding: "16px",
             borderBottom: "1px solid #e2e8f0",
             display: "flex",
             justifyContent: "space-between",
@@ -200,6 +190,7 @@ export default async function Dashboard() {
             gap: 12,
             flexWrap: "wrap",
           }}
+          className="sm:px-5"
         >
           <h2
             style={{
@@ -330,14 +321,7 @@ export default async function Dashboard() {
       </div>
 
       {/* Quick links — responsive grid: 2 cols on mobile, 4 on desktop */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: 10,
-        }}
-        className="sm:gap-3"
-      >
+      <div className="admin-card-grid">
         {[
           { href: "/admin/tutors", label: "Tambah Tutor", color: "#10b981" },
           {
